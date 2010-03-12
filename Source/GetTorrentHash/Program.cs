@@ -58,9 +58,9 @@ namespace GetTorrentHash
             }
         }
 
+
         static String CreateTorrentFile(String argPath)
         {
-
             // BitComet --make <SOURCE> [--output=OUTPUT] [--silent] [--tray] 
 
             String dstTorrentDir = "C:\\.torrents"; // @TODO: get tempDir
@@ -75,7 +75,7 @@ namespace GetTorrentHash
             {
                 // clean directory
                 string[] files = Directory.GetFiles(dstTorrentDir, "*");
-                foreach ( string file in files )
+                foreach (string file in files)
                 {
                     File.Delete(file);
                 }
@@ -87,6 +87,35 @@ namespace GetTorrentHash
             }
 
             Directory.CreateDirectory(dstTorrentDir);
+
+            return CreateTorrentFile_MonoTorrent(argPath, dstTorrentDir);
+        }
+
+        /************************************************************************/
+        /* Uses abilities of MonoTorrent                                        */
+        /************************************************************************/
+        static String CreateTorrentFile_MonoTorrent(String argPath, String dstTorrentDir)
+        {
+            FileInfo info = new FileInfo(argPath);
+            String tFileName = info.Name + ".torrent";
+            String dstTorrentFile = Path.Combine(dstTorrentDir, tFileName);
+
+            MonoTorrent.Common.TorrentCreator creator = new MonoTorrent.Common.TorrentCreator();
+            TorrentFileSource fileSource = new TorrentFileSource(argPath);
+            String announceUrl = "http://178.67.41.241:6666/announce";
+            
+            creator.GetrightHttpSeeds.Add(announceUrl);
+
+            creator.Create(fileSource, dstTorrentFile);
+
+            return dstTorrentFile;
+        }
+
+        /** 
+         * Uses BitComet to build the .torrent files
+         */
+        static String CreateTorrentFile_BitComet(String argPath, String dstTorrentDir)
+        {
 
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             proc.StartInfo.FileName = GetBitcometPath();
@@ -110,6 +139,15 @@ namespace GetTorrentHash
             {
                 throw new Exception("Failed to create .torrent-file: " + dstTorrentPath);
             }
+
+            // Call BitComet to start uploading of the torrent file
+            System.Diagnostics.Process proc2 = new System.Diagnostics.Process();
+            proc2.StartInfo.FileName = GetBitcometPath();
+            proc2.EnableRaisingEvents = false;
+            FileInfo argFileInfo = new FileInfo(argPath);
+            proc2.StartInfo.Arguments = "\"" + dstTorrentPath + "\" --output=\"" + argFileInfo.Directory + "\" --silent";
+            Debug("Exe: " + proc2.StartInfo.FileName + " " + proc2.StartInfo.Arguments);
+            proc2.Start();
 
             return dstTorrentPath;
         }
@@ -138,7 +176,7 @@ namespace GetTorrentHash
                 throw new Exception("Can't get installation path for BitComet");
             }
 
-            return installPath + "\\" + exeFile;
+            return Path.Combine(installPath, exeFile);
         }
 
         /**
@@ -180,7 +218,8 @@ namespace GetTorrentHash
                http://9.rarbg.com:2710/announce
              */
 
-            String announceUrl = "http://9.rarbg.com:2710/announce";
+            //String announceUrl = "http://9.rarbg.com:2710/announce";
+            String announceUrl = "http://178.67.41.241:6666/announce";
 
             String anUrlEncoded = System.Web.HttpUtility.UrlEncode(announceUrl);
 
@@ -189,16 +228,25 @@ namespace GetTorrentHash
             return magnetUrl;
         }
 
+        /************************************************************************/
+        /* Copies text to clipboard                                             */
+        /************************************************************************/
         static void CopyToClipboard(String text)
         {
             System.Windows.Forms.Clipboard.SetText(text);
         }
 
+        /************************************************************************/
+        /* Shows user message                                                   */
+        /************************************************************************/
         static void AlertUser(String text)
         {
             UserMessage(text, "Copied to Clipboard!");
         }
 
+        /************************************************************************/
+        /* Shows user message                                                   */
+        /************************************************************************/
         static void UserMessage(String text, String caption)
         {
             System.Windows.Forms.MessageBox.Show(text, caption);
@@ -213,6 +261,7 @@ namespace GetTorrentHash
 
             // 1. create .torrent file with BitComet's command line interface and make BitComet seed the content
             String pathToTorrentFile = CreateTorrentFile(argPath);
+            StartSeeding(pathToTorrentFile, argPath);
 
             // 2. Build magnet url from resuling .torrent-file
             String magnetUri = BuildMagnetUri(pathToTorrentFile);
@@ -224,6 +273,24 @@ namespace GetTorrentHash
             AlertUser(magnetUri);
             return;
 
+        }
+
+        /************************************************************************/
+        /*                                                                      */
+        /************************************************************************/
+        static void StartSeeding ( String pathToTorrent, String sourceDataPath )
+        {
+            // Call BitComet to start uploading of the torrent file
+            System.Diagnostics.Process proc2 = new System.Diagnostics.Process();
+            proc2.StartInfo.FileName = GetBitcometPath();
+            proc2.EnableRaisingEvents = false;
+            FileInfo argFileInfo = new FileInfo(sourceDataPath);
+
+            proc2.StartInfo.Arguments = "\"" + pathToTorrent + "\" --output=\"" + 
+                argFileInfo.Directory + "\" --silent";
+
+            Debug("Exe: " + proc2.StartInfo.FileName + " " + proc2.StartInfo.Arguments);
+            proc2.Start();
         }
 
         /***************************************************************************************************/
