@@ -1,0 +1,5 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartArguments>D:\vke\dev\nwTorrent\ThirdParty\Bitsharp\src\GetTorrentHash\bin\Debug\MonoTorrent.dll</StartArguments>
+  </PropertyGroup>
+</Project>
