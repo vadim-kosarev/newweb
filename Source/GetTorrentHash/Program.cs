@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -79,16 +80,29 @@ namespace GetTorrentHash
             String dstTorrentFileDir = Path.Combine(info.Directory.ToString(), ".bt");
 
             if (!Directory.Exists(dstTorrentFileDir))
-                Directory.CreateDirectory(dstTorrentFileDir);
+            {
+                // create hidden .bt subdirectory
+                DirectoryInfo di = Directory.CreateDirectory(dstTorrentFileDir);
+                di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
+            }
 
             String dstTorrentFile = Path.Combine(dstTorrentFileDir, tFileName);
             
 
             MonoTorrent.Common.TorrentCreator creator = new MonoTorrent.Common.TorrentCreator();
             TorrentFileSource fileSource = new TorrentFileSource(argPath);
-            String announceUrl = "http://178.67.41.241:6666/announce";
-            
-            creator.GetrightHttpSeeds.Add(announceUrl);
+
+            String url1 = "http://178.67.41.241:6666/announce";
+            String url2 = "http://127.0.0.1:6666/announce";
+
+            List<String> aList = new List<String>();
+            aList.Add(url1);
+            aList.Add(url2);
+
+            creator.Announces.Add(aList);
+
+            creator.GetrightHttpSeeds.Add(url1);
+            creator.GetrightHttpSeeds.Add(url2);
 
             creator.Create(fileSource, dstTorrentFile);
 
@@ -230,10 +244,9 @@ namespace GetTorrentHash
 
             //String announceUrl = "http://9.rarbg.com:2710/announce";
             String announceUrl = "http://178.67.41.241:6666/announce";
-
             String anUrlEncoded = System.Web.HttpUtility.UrlEncode(announceUrl);
 
-            String magnetUrl = " magnet:?xt=urn:btih:" + hexHash +"&tr=" + anUrlEncoded;
+            String magnetUrl = " magnet:?xt=urn:btih:" + hexHash; // +"&tr=" + anUrlEncoded;
 
             return magnetUrl;
         }
@@ -272,15 +285,18 @@ namespace GetTorrentHash
             // 1. create .torrent file with BitComet's command line interface and make BitComet seed the content
             String pathToTorrentFile = CreateTorrentFile(argPath);
             StartSeeding(pathToTorrentFile, argPath);
+            //System.Threading.Thread.Sleep(2500);
 
             // 2. Build magnet url from resuling .torrent-file
             String magnetUri = BuildMagnetUri(pathToTorrentFile);
 
             // 3. Copy magnet URL to ClipBoard and inform user about that
-            CopyToClipboard(magnetUri);
+            //CopyToClipboard(magnetUri);
 
             // 4. Remove temporary .torrent file and exit
             AlertUser(magnetUri);
+
+
             return;
 
         }
