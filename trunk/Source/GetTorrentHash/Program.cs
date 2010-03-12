@@ -74,7 +74,7 @@ namespace GetTorrentHash
         /************************************************************************/
         static String CreateTorrentFile_MonoTorrent(String argPath)
         {
-            
+
             FileInfo info = new FileInfo(argPath);
             String tFileName = info.Name + ".torrent";
             String dstTorrentFileDir = Path.Combine(info.Directory.ToString(), ".bt");
@@ -87,22 +87,32 @@ namespace GetTorrentHash
             }
 
             String dstTorrentFile = Path.Combine(dstTorrentFileDir, tFileName);
-            
+
 
             MonoTorrent.Common.TorrentCreator creator = new MonoTorrent.Common.TorrentCreator();
             TorrentFileSource fileSource = new TorrentFileSource(argPath);
 
-            String url1 = "http://178.67.41.241:6666/announce";
-            String url2 = "http://127.0.0.1:6666/announce";
 
-            List<String> aList = new List<String>();
-            aList.Add(url1);
-            aList.Add(url2);
+            String[] urls = { 
+                "http://127.0.0.1:6666/announce",
+                "http://10.rarbg.com/announce",
+                "http://9.rarbg.com:2710/announce",
+                "http://genesis.1337x.org:1337/announce",
+                "udp://tracker.openbittorrent.com:80/announce",
+                "http://tracker.openbittorrent.com/announce",
+                "http://streamtrack.no-ip.org:6969/announce",
+                "http://retracker.local/announce"
+            };
 
-            creator.Announces.Add(aList);
 
-            creator.GetrightHttpSeeds.Add(url1);
-            creator.GetrightHttpSeeds.Add(url2);
+            foreach ( String url in urls )
+            {
+                List<String> aList = new List<String>();
+                aList.Add(url);
+                creator.GetrightHttpSeeds.Add(url);
+                creator.Announces.Add(aList);
+            }
+
 
             creator.Create(fileSource, dstTorrentFile);
 
@@ -304,7 +314,7 @@ namespace GetTorrentHash
         /************************************************************************/
         /*                                                                      */
         /************************************************************************/
-        static void StartSeeding ( String pathToTorrent, String sourceDataPath )
+        static void StartSeeding(String pathToTorrent, String sourceDataPath)
         {
             // Call BitComet to start uploading of the torrent file
             System.Diagnostics.Process proc2 = new System.Diagnostics.Process();
@@ -312,7 +322,7 @@ namespace GetTorrentHash
             proc2.EnableRaisingEvents = false;
             FileInfo argFileInfo = new FileInfo(sourceDataPath);
 
-            proc2.StartInfo.Arguments = "\"" + pathToTorrent + "\" --output=\"" + 
+            proc2.StartInfo.Arguments = "\"" + pathToTorrent + "\" --output=\"" +
                 argFileInfo.Directory + "\" --silent";
 
             Debug("Exe: " + proc2.StartInfo.FileName + " " + proc2.StartInfo.Arguments);
