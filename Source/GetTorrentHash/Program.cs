@@ -61,6 +61,45 @@ namespace GetTorrentHash
 
         static String CreateTorrentFile(String argPath)
         {
+            /*
+            
+            */
+
+            return CreateTorrentFile_MonoTorrent(argPath);
+        }
+
+        /************************************************************************/
+        /* Uses abilities of MonoTorrent                                        */
+        /************************************************************************/
+        static String CreateTorrentFile_MonoTorrent(String argPath)
+        {
+            
+            FileInfo info = new FileInfo(argPath);
+            String tFileName = info.Name + ".torrent";
+            String dstTorrentFileDir = Path.Combine(info.Directory.ToString(), ".bt");
+
+            if (!Directory.Exists(dstTorrentFileDir))
+                Directory.CreateDirectory(dstTorrentFileDir);
+
+            String dstTorrentFile = Path.Combine(dstTorrentFileDir, tFileName);
+            
+
+            MonoTorrent.Common.TorrentCreator creator = new MonoTorrent.Common.TorrentCreator();
+            TorrentFileSource fileSource = new TorrentFileSource(argPath);
+            String announceUrl = "http://178.67.41.241:6666/announce";
+            
+            creator.GetrightHttpSeeds.Add(announceUrl);
+
+            creator.Create(fileSource, dstTorrentFile);
+
+            return dstTorrentFile;
+        }
+
+        /** 
+         * Uses BitComet to build the .torrent files
+         */
+        static String CreateTorrentFile_BitComet(String argPath)
+        {
             // BitComet --make <SOURCE> [--output=OUTPUT] [--silent] [--tray] 
 
             String dstTorrentDir = "C:\\.torrents"; // @TODO: get tempDir
@@ -87,35 +126,6 @@ namespace GetTorrentHash
             }
 
             Directory.CreateDirectory(dstTorrentDir);
-
-            return CreateTorrentFile_MonoTorrent(argPath, dstTorrentDir);
-        }
-
-        /************************************************************************/
-        /* Uses abilities of MonoTorrent                                        */
-        /************************************************************************/
-        static String CreateTorrentFile_MonoTorrent(String argPath, String dstTorrentDir)
-        {
-            FileInfo info = new FileInfo(argPath);
-            String tFileName = info.Name + ".torrent";
-            String dstTorrentFile = Path.Combine(dstTorrentDir, tFileName);
-
-            MonoTorrent.Common.TorrentCreator creator = new MonoTorrent.Common.TorrentCreator();
-            TorrentFileSource fileSource = new TorrentFileSource(argPath);
-            String announceUrl = "http://178.67.41.241:6666/announce";
-            
-            creator.GetrightHttpSeeds.Add(announceUrl);
-
-            creator.Create(fileSource, dstTorrentFile);
-
-            return dstTorrentFile;
-        }
-
-        /** 
-         * Uses BitComet to build the .torrent files
-         */
-        static String CreateTorrentFile_BitComet(String argPath, String dstTorrentDir)
-        {
 
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             proc.StartInfo.FileName = GetBitcometPath();
