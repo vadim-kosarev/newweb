@@ -308,7 +308,8 @@ namespace GetTorrentHash
 
             // 2. Build magnet url from resuling .torrent-file
             String magnetUri = BuildMagnetUri(pathToTorrentFile);
-            String magnetUriCB = "## " + magnetUri;
+            FileInfo info = new FileInfo(argPath);
+            String magnetUriCB = "\"" + info.Name + "\" : " + magnetUri;
 
             // 3. Copy magnet URL to ClipBoard and inform user about that
             CopyToClipboard(magnetUriCB);
