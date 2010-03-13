@@ -228,7 +228,7 @@ namespace GetTorrentHash
         /**
          * builds magnet URI
          */
-        static String BuildMagnetUri(String pathToTorrentFile)
+        static String BuildMagnetUri(String pathToTorrentFile, String displayName)
         {
             Debug("Processing " + pathToTorrentFile);
 
@@ -258,7 +258,9 @@ namespace GetTorrentHash
             // http://freetorrent.ru/announce.php
 
 
-            String magnetUrl = "magnet:?xt=urn:btih:" + hexHash; // +"&tr=" + anUrlEncoded;
+            String magnetUrl = "magnet:?xt=urn:btih:" + hexHash;
+
+            magnetUrl += "&dn=" + System.Web.HttpUtility.UrlEncode(displayName);
 
             foreach (String url in shareUrls)
             {
@@ -307,8 +309,8 @@ namespace GetTorrentHash
             //System.Threading.Thread.Sleep(2500);
 
             // 2. Build magnet url from resuling .torrent-file
-            String magnetUri = BuildMagnetUri(pathToTorrentFile);
             FileInfo info = new FileInfo(argPath);
+            String magnetUri = BuildMagnetUri(pathToTorrentFile, info.Name);
             String magnetUriCB = "\"" + info.Name + "\" : " + magnetUri;
 
             // 3. Copy magnet URL to ClipBoard and inform user about that
