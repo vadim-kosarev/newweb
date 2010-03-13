@@ -4,6 +4,7 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Threading;
 
 using System.ComponentModel;
 using System.Data;
@@ -277,7 +278,22 @@ namespace GetTorrentHash
         /************************************************************************/
         static void CopyToClipboard(String text)
         {
-            System.Windows.Forms.Clipboard.SetText(text);
+            int tries = 5;
+            while ( tries > 0 )
+            {
+                try {
+                    System.Windows.Forms.Clipboard.SetText(text);
+                    return;
+                } catch (Exception e) {
+                    Debug(e.Message);
+                    tries--;
+                    if (tries == 0)
+                        throw e;
+                    else
+                        Thread.Sleep(750);
+                }
+            }
+            
         }
 
         /************************************************************************/
