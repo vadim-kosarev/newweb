@@ -15,6 +15,13 @@ namespace GetTorrentHash
 {
     class Program
     {
+
+        static String[] shareUrls = {
+                                        "http://tracker.openbittorrent.com/announce",
+                                        "http://retracker.local/announce",
+                                        "http://retracker.local:99/announce"
+                                    };
+
         /***************************************************************************************************/
         /* Main                                                                                            */
         /***************************************************************************************************/
@@ -99,11 +106,16 @@ namespace GetTorrentHash
                 "http://9.rarbg.com:2710/announce",
                 "http://genesis.1337x.org:1337/announce",
                 "udp://tracker.openbittorrent.com:80/announce",
-                "http://tracker.openbittorrent.com/announce",
                 "http://streamtrack.no-ip.org:6969/announce",
-                "http://retracker.local/announce"
             };
 
+            foreach ( String url in shareUrls )
+            {
+                List<String> aList = new List<String>();
+                aList.Add(url);
+                creator.GetrightHttpSeeds.Add(url);
+                creator.Announces.Add(aList);
+            }
 
             foreach ( String url in urls )
             {
@@ -246,17 +258,14 @@ namespace GetTorrentHash
             // http://freetorrent.ru/announce.php
 
 
-            //String announceUrl = "http://freetorrent.ru/announce.php";
-            /**
-             * http://10.rarbg.com/announce
-               http://9.rarbg.com:2710/announce
-             */
+            String magnetUrl = "magnet:?xt=urn:btih:" + hexHash; // +"&tr=" + anUrlEncoded;
 
-            //String announceUrl = "http://9.rarbg.com:2710/announce";
-            String announceUrl = "http://178.67.41.241:6666/announce";
-            String anUrlEncoded = System.Web.HttpUtility.UrlEncode(announceUrl);
-
-            String magnetUrl = " magnet:?xt=urn:btih:" + hexHash; // +"&tr=" + anUrlEncoded;
+            foreach (String url in shareUrls)
+            {
+                String anUrlEncoded = System.Web.HttpUtility.UrlEncode(url);
+                String trackersPart = "tr=" + anUrlEncoded;
+                magnetUrl += "&" + trackersPart;
+            }
 
             return magnetUrl;
         }
@@ -299,12 +308,13 @@ namespace GetTorrentHash
 
             // 2. Build magnet url from resuling .torrent-file
             String magnetUri = BuildMagnetUri(pathToTorrentFile);
+            String magnetUriCB = "## " + magnetUri;
 
             // 3. Copy magnet URL to ClipBoard and inform user about that
-            //CopyToClipboard(magnetUri);
+            CopyToClipboard(magnetUriCB);
 
             // 4. Remove temporary .torrent file and exit
-            AlertUser(magnetUri);
+            AlertUser(magnetUriCB);
 
 
             return;
