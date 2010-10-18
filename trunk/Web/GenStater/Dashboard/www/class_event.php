@@ -2,16 +2,17 @@
 
 include_once("sys_config.php");
 
-$sql_IDDataType = "INT(10) UNSIGNED NOT NULL";
+$sql_IDDataType = "INT(10) UNSIGNED NOT NULL DEFAULT 1";
 $sql_IDCreateDataType = "INT(10) UNSIGNED NOT NULL AUTO_INCREMENT";
 
 $arrDataTypesMap = array(
     "date" => "TIMESTAMP",
+    "tstamp" => "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
     "ext" => $sql_IDDataType,
     "id" => $sql_IDCreateDataType,
     "int" => "INT(10) UNSIGNED NULL",
     "str" => "VARCHAR(255) NULL",
-    "tag" => "INT(10) UNSIGNED NULL",
+    "tag" => $sql_IDDataType,
     "default" => "VARCHAR(255) NULL"
 );
 
@@ -99,7 +100,7 @@ class Event {
      *
      * @param <type> $arr 
      */
-    private function pushTagsFields(&$arr) {
+    private function pushSysFields(&$arr) {
         array_push($arr, "tag0");
         array_push($arr, "tag1");
         array_push($arr, "tag2");
@@ -110,6 +111,7 @@ class Event {
         array_push($arr, "tag7");
         array_push($arr, "tag8");
         array_push($arr, "tag9");
+        array_push($arr, "d_tstamp_sysEventRegistered");
     }
 
     /**
@@ -138,8 +140,8 @@ class Event {
         }
 
         $tableName = $this->getDataTableName($event);
-        $this->pushTagsFields($dataTableFields);
-        $this->ensureTableFields($tableName, $dataTableFields);
+        $this->pushSysFields($dataTableFields);
+        $this->ensureTableFields($tableName, $dataTableFields, true, false);
         return $this->sql_InsertRecord($tableName, $arrData);
     }
 
@@ -193,7 +195,7 @@ class Event {
         $sqlValues = "";
 
         $comma = false;
-        foreach(array_keys($arrData) as $key) {
+        foreach (array_keys($arrData) as $key) {
             if ($comma) {
                 $sqlFields .= ",";
                 $sqlValues .= ",";
@@ -207,7 +209,7 @@ class Event {
 
         global $dbh;
         $stmt = $dbh->prepare($sql);
-        foreach(array_keys($arrData) as $key) {
+        foreach (array_keys($arrData) as $key) {
             $stmt->bindParam(":V_" . $key, $arrData[$key]);
         }
         return $stmt->execute();
@@ -220,7 +222,7 @@ class Event {
         $fDataName = $this->getFieldDataName($extDatakey);
         $extDataTable = $this->getExtTableName($fDataName);
         $extDataFields = array("id", "d_str_name");
-        $this->ensureTableFields($extDataTable, $extDataFields);
+        $this->ensureTableFields($extDataTable, $extDataFields, false, true);
     }
 
     /**
@@ -228,7 +230,9 @@ class Event {
      * @param <type> $dataTable
      * @param <type> $dataFields
      */
-    private function ensureTableFields($dataTable, $dataFields) {
+    private function ensureTableFields(
+    $dataTable, $dataFields, $createView = false, $insertDefaultRaw = false
+    ) {
         $sql = "SHOW FIELDS FROM $dataTable";
         global $dbh;
         $stmt = $dbh->prepare($sql);
@@ -241,12 +245,18 @@ class Event {
             }
         } else {
             $this->createTable($dataTable, $dataFields);
+            if ($insertDefaultRaw) {
+                $this->sql_InsertRecord($dataTable, array("id" => "1"));
+            }
             $existingFields = $dataFields;
         }
 
         $arrDiff = array_diff($dataFields, $existingFields);
         foreach ($arrDiff as $fieldToAdd) {
             $this->sql_addField($dataTable, $fieldToAdd);
+        }
+        if ($createView) {
+            $this->sql_createDataView($dataTable, $dataFields);
         }
     }
 
@@ -262,6 +272,15 @@ class Event {
                 $this->sql_DataType($this->getFieldDataType($fieldToAdd));
         global $dbh;
         return $dbh->query($sql);
+    }
+
+    /**
+     *
+     * @param <type> $dataTable
+     * @param <type> $dataFields 
+     */
+    private function sql_createDataView($dataTable, $dataFields) {
+        
     }
 
     /**
@@ -289,6 +308,15 @@ class Event {
      */
     private function getExtTableName($dataName) {
         return "data_ext_" . $dataName;
+    }
+
+    /**
+     *
+     * @param <type> $eventName
+     * @return <type> 
+     */
+    private function getViewDataName($eventName) {
+        return "view_events_" . $eventName;
     }
 
     /**
