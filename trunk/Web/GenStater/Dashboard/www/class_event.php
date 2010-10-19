@@ -101,16 +101,18 @@ class Event {
      * @param <type> $arr 
      */
     private function pushSysFields(&$arr) {
-        array_push($arr, "tag0");
-        array_push($arr, "tag1");
-        array_push($arr, "tag2");
-        array_push($arr, "tag3");
-        array_push($arr, "tag4");
-        array_push($arr, "tag5");
-        array_push($arr, "tag6");
-        array_push($arr, "tag7");
-        array_push($arr, "tag8");
-        array_push($arr, "tag9");
+        /*
+          array_push($arr, "tag0");
+          array_push($arr, "tag1");
+          array_push($arr, "tag2");
+          array_push($arr, "tag3");
+          array_push($arr, "tag4");
+          array_push($arr, "tag5");
+          array_push($arr, "tag6");
+          array_push($arr, "tag7");
+          array_push($arr, "tag8");
+          array_push($arr, "tag9");
+         */
         array_push($arr, "d_tstamp_sysEventRegistered");
     }
 
@@ -280,7 +282,55 @@ class Event {
      * @param <type> $dataFields 
      */
     private function sql_createDataView($dataTable, $dataFields) {
-        
+        $sql = "CREATE VIEW view_" . $dataTable . " AS \n";
+        $sql .= " SELECT ";
+        $extData = array();
+        $bComma = false;
+        foreach ($dataFields as $fieldName) {
+            if ($bComma)
+                $sql .= ", \n";
+            $f = "";
+            if ($this->isExtData($fieldName)) {
+                $fExtDataName = $this->getFieldDataName($fieldName);
+                $extTable = $this->getExtTableName($fExtDataName);
+                $f = $extTable . ".d_str_name";
+
+                if (!array_key_exists($fExtDataName, $extData)) {
+                    $extData[$fExtDataName] = $fExtDataName;
+                }
+            } else {
+                $f = $dataTable . "." . $fieldName;
+            }
+            $sql .= $f . " AS `" . $f . "`";
+            $bComma = true;
+        }
+
+        $sql .= "\n FROM \n";
+
+        $sql .= $dataTable;
+
+        foreach ($extData as $t) {
+            $extDataTable = $this->getExtTableName($t);
+            $sql .= ",\n " . $extDataTable;
+        }
+
+        if (count($extData) > 0) {
+            $sql .= "\n WHERE \n";
+
+            $bAnd = false;
+            foreach ($extData as $t) {
+                if ($bAnd) $sql .= "\n AND \n";
+                $extDataTable = $this->getExtTableName($t);
+                $extDataKey = $this->getExtFieldName($t);
+                $sql .=
+                        $dataTable . "." . $extDataKey . " = " . $extDataTable . ".id";
+                $bAnd = true;
+            }
+        }
+
+        global $dbh;
+        $stmt = $dbh->prepare($sql);
+        return $stmt->execute();
     }
 
     /**
@@ -339,6 +389,10 @@ class Event {
         } else {
             return $arrDataTypesMap["default"];
         }
+    }
+
+    private function getExtFieldName($dataName) {
+        return "d_ext_$dataName";
     }
 
     private function isExtData($fieldName) {

@@ -8,4 +8,4 @@
     
     if ($event->store()) echo "OK";
     else echo "ERROR";
-?>OK
+?>
