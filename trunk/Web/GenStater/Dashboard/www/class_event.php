@@ -253,12 +253,15 @@ class Event {
             $existingFields = $dataFields;
         }
 
+        $allFields = $existingFields;
         $arrDiff = array_diff($dataFields, $existingFields);
         foreach ($arrDiff as $fieldToAdd) {
             $this->sql_addField($dataTable, $fieldToAdd);
+            array_push($allFields, $fieldToAdd);
         }
         if ($createView) {
-            $this->sql_createDataView($dataTable, $dataFields);
+            $this->sql_dropDataView($dataTable);
+            $this->sql_createDataView($dataTable, $allFields);
         }
     }
 
@@ -276,6 +279,11 @@ class Event {
         return $dbh->query($sql);
     }
 
+    private function sql_dropDataView($dataTable) {
+        $sql = "DROP VIEW view_" . $dataTable;
+        global $dbh;
+        $dbh->query($sql);
+    }
     /**
      *
      * @param <type> $dataTable
