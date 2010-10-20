@@ -2,15 +2,16 @@
 
 include_once("sys_config.php");
 
-$sql_IDDataType = "INT(10) UNSIGNED NOT NULL DEFAULT 1";
-$sql_IDCreateDataType = "INT(10) UNSIGNED NOT NULL AUTO_INCREMENT";
+$sql_IDDataType = "BIGINT(10) UNSIGNED NOT NULL DEFAULT 1";
+$sql_IDCreateDataType = "BIGINT(10) UNSIGNED NOT NULL AUTO_INCREMENT";
 
 $arrDataTypesMap = array(
     "date" => "TIMESTAMP",
     "tstamp" => "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
     "ext" => $sql_IDDataType,
     "id" => $sql_IDCreateDataType,
-    "int" => "INT(10) UNSIGNED NULL",
+    "int" => "INT(10) NULL",
+    "uint" => "INT(10) UNSIGNED NULL",
     "str" => "VARCHAR(255) NULL",
     "tag" => $sql_IDDataType,
     "default" => "VARCHAR(255) NULL"
