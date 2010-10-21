@@ -38,6 +38,7 @@ table.sqlData {
 
 td {
     font-size: 10pt;
+    vertical-align: top;
 }
 
 .sqlDataRow1 {

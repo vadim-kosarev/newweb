@@ -17,4 +17,17 @@ function findFieldByAlias($what, $where) {
         return $what;
     }
 }
+
+function my_encode($str) {
+    $str = str_replace(".", "|", $str);
+    $str = urlencode($str);
+    return $str;
+}
+
+function my_dencode($str) {
+    $str = urldecode($str);
+    $str = str_replace("|", ".", $str);
+    return $str;
+}
+
 ?>
