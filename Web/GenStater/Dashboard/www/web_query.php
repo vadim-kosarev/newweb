@@ -68,6 +68,8 @@ $limitAdd = " LIMIT 0,1000 ";
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
 ?>
 
+<!-- <?=$qSQL?> -->
+
 <?php
 $stmt = $dbh->prepare($qSQL);
 
