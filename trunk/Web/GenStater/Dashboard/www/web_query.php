@@ -15,12 +15,16 @@ $stmt->bindValue(":queryID", $queryID);
 $qSQL = "";
 $qName = "";
 $qOrderBy = "";
+$chartColumns = "";
+$xAxis = "";
 
 if ($stmt->execute()) {
     $dArr = $stmt->fetch();
     $qSQL = $dArr["sql"];
     $qName = $dArr["name"];
     $qOrderBy = $dArr["orderby"];
+    $chartColumns = $dArr["chart_columns"];
+    $xAxis = $dArr["chart_x_axis"];
 }
 ?>
 
@@ -125,11 +129,11 @@ if ($stmt->execute()) {
                         }
                         echo "<tr><td>" . $formParamName . "</td>";
                         echo "<td><input name='" . my_encode($formParamName) .
-                            "' type='text' value='$formParamValue'/></td></tr>\n";
+                        "' type='text' value='$formParamValue'/></td></tr>\n";
                     }
                     ?>
-                        <tr><td>ORDER BY</td><td><input name="orderby" value="<?=$qOrderBy?>"/></td></tr>
-                    </table>
+                    <tr><td>ORDER BY</td><td><input name="orderby" value="<?= $qOrderBy ?>"/></td></tr>
+                </table>
                 <input type="submit"/>
                 <pre class="hint">
 HINT:
@@ -141,7 +145,11 @@ sql_X : V1...V2   =>   X >= "V1" AND X <= "V2"
                 </pre>
             </form>
         </td>
-        <td><pre class="sql"><?= $qSQL ?></pre></td>
+        <td>
+            <?php if ($chartColumns) { ?>
+            <img src="png_pChart.php?ts=<?= time() ?>&data=<?=$chartColumns?>&xAxis=<?=$xAxis?>&sql=<?= urlencode($qSQL) ?>"/>
+            <?php } ?>
+            <pre class="sql"><?= $qSQL ?></pre></td>
     </tr></table>
 <table class="sqlData">
     <?php
