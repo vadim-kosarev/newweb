@@ -60,8 +60,17 @@ foreach (array_keys($_GET) as $key) {
             $whereClause .= " AND \n";
         }
 
+        $valSrc = $val;
+        $vals = preg_split("/\,/", $valSrc);
+        $isOrAdding = false;
+        $valsWhereAdd = "";
+        
+  foreach ($vals as $val) {
+
         $arr = array();
-        $whereAdd = $p . " = '" . $val . "'";
+        $whereAdd = "";
+        
+        $whereAdd .= $p . " = '" . $val . "'";
 
         if (strpos($val, "*") !== false) {
             $val = str_replace("*", "%", $val);
@@ -76,7 +85,13 @@ foreach (array_keys($_GET) as $key) {
             $whereAdd = $p . " <= '" . $val . "'";
         }
 
-        $whereClause .= $whereAdd;
+        $valsWhereAdd .= ($isOrAdding?" OR ":"") . $whereAdd;
+
+        $isOrAdding = true;
+  }
+
+
+        $whereClause .= "(" . $valsWhereAdd . ")";
         $whereClauseEmpty = false;
     }
 }
@@ -142,6 +157,8 @@ sql_X : VAL*STR   =>   X LIKE "VAL%STR"
 sql_X : V1...     =>   X >= "V1"
 sql_X : ...V2     =>   X <= "V2"
 sql_X : V1...V2   =>   X >= "V1" AND X <= "V2"
+
+sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
                 </pre>
             </form>
         </td>
