@@ -1,6 +1,6 @@
 <?php
 
-include_once("sys_config.php");
+include_once("../Common/sys_config.php");
 
 $sql_IDDataType = "BIGINT(10) UNSIGNED NOT NULL DEFAULT 1";
 $sql_IDCreateDataType = "BIGINT(10) UNSIGNED NOT NULL AUTO_INCREMENT";
