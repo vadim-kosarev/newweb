@@ -8,8 +8,8 @@ include("pChart/pChart/pData.class");
 include("pChart/pChart/pChart.class");
 
 // Query data
-include_once("sys_config.php");
-include_once("sys_utils.php");
+include_once("../Common/sys_config.php");
+include_once("../Common/sys_utils.php");
 
 $dbUrl = "mysql:host=$config_db_host;dbname=$config_db_name;port=$config_db_port";
 $dbh = new PDO($dbUrl, $config_db_user, $config_db_password);
@@ -73,7 +73,7 @@ $Test->drawLegend(75, 35, $DataSet->GetDataDescription(), 255, 255, 255);
 $Test->setFontProperties("pChart/Fonts/tahoma.ttf", 10);
 $Test->drawTitle(60, 22, $column, 50, 50, 50, 585);
 
-$file = "pChart/Cache/chart$sqlHash.png";
+$file = "../pChart/Cache/chart$sqlHash.png";
 $Test->Render($file);
 readfile($file);
 ?>
