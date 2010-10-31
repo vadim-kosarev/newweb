@@ -2,7 +2,7 @@
 	
    $rtmpServer = isset($_GET["host"])?$_GET["host"]:"webcall-test.metr.com";
    $callee = isset($_GET["callee"])?$_GET["callee"]:"442030514876";
-
+   $run = isset($_GET["run"])?"true"==$_GET["run"]:false;
 
 
 ?>
@@ -26,16 +26,17 @@ var flashphone;
 
 
 
+
 function executeScript() {
+<?php if ($run) { ?>
    trace("Executing script...");
    login();
    call();
    setTimeout('hangup()', 120000);
    setTimeout('logoff()', 125000);
    setTimeout('windows.close()', 130000);
+<?php } ?>
 }
-
-
 
 
 
