@@ -234,7 +234,7 @@ params.allowfullscreen = "true";
 params.allowscriptaccess = "always";
 var attributes = {};
 if (swfobject.hasFlashPlayerVersion("10.0.12")) {
-	swfobject.embedSWF("PhoneJS.swf?v=160.4", "PHONE", "215", "138", "10.0.12", "expressInstall.swf", flashvars, params, attributes, positionStatus);
+	swfobject.embedSWF("c.swf?v=160.4", "PHONE", "215", "138", "10.0.12", "expressInstall.swf", flashvars, params, attributes, positionStatus);
 } else if (swfobject.hasFlashPlayerVersion("6.0")) {
 	alert('Пожалуйста, скачайте последнюю версию Adobe Flash Player');
 } else {
