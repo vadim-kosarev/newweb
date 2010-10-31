@@ -2,6 +2,7 @@
 	
    $rtmpServer = isset($_GET["host"])?$_GET["host"]:"webcall-test.metr.com";
    $callee = isset($_GET["callee"])?$_GET["callee"]:"442030514876";
+   $visibleName = isset($_GET["visibleName"])?$_GET["visibleName"]:"visibleName";
    $run = isset($_GET["run"])?"true"==$_GET["run"]:false;
 
 
@@ -278,7 +279,7 @@ if (swfobject.hasFlashPlayerVersion("10.0.12")) {
           <a href="#" onClick="call();return false;">call</a> - Make call<br/> 
           <input id="callerTextField" type="text" value="caller"/> Caller<br/>
           <input id="calleeTextField" type="text" value="<?=$callee?>"/> Callee<br/>
-          <input id="visibleNameTextField" type="text" value="visibleName"/> VisibleName<br/><br/>	
+          <input id="visibleNameTextField" type="text" value="<?=$visibleName?>"/> VisibleName<br/><br/>	
           </li>
           
           <li><a href="#" onClick="hangup();return false;">hangup</a> - Hangup call<br/><br/></li>
