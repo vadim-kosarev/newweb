@@ -11,38 +11,50 @@ include("pChart/pChart/pChart.class");
 include_once("../Common/sys_config.php");
 include_once("../Common/sys_utils.php");
 
-$dbUrl = "mysql:host=$config_db_host;dbname=$config_db_name;port=$config_db_port";
-$dbh = new PDO($dbUrl, $config_db_user, $config_db_password);
+$isSql = true;
+if (isset($_GET["plain"])) {
+    $isSql = false;
+}
 
-$qSql = $_GET["sql"];
-$sqlHash = md5($qSql);
-
-$stmt = $dbh->prepare($qSql);
-// Dataset definition
 $DataSet = new pData;
 $columnsStr = $_GET["data"];
 $xAxis = $_GET["xAxis"];
+$sqlHash = "___";
 
-if ($stmt->execute()) {
+if ($isSql) {
+    $dbUrl = "mysql:host=$config_db_host;dbname=$config_db_name;port=$config_db_port";
+    $dbh = new PDO($dbUrl, $config_db_user, $config_db_password);
+    $qSql = $_GET["sql"];
+    $sqlHash = md5($qSql);
 
-    $columns = preg_split("/,/", $columnsStr);
-    while ($arr = $stmt->fetch()) {
-        $DataSet->AddPoint($arr[$xAxis], $xAxis);
-        foreach ($columns as $column) {
-            $DataSet->AddPoint($arr[$column], $column);
+    $stmt = $dbh->prepare($qSql);
+    // Dataset definition
+
+    if ($stmt->execute()) {
+
+        $columns = preg_split("/,/", $columnsStr);
+        while ($arr = $stmt->fetch()) {
+            $DataSet->AddPoint($arr[$xAxis], $xAxis);
+            foreach ($columns as $column) {
+                $DataSet->AddPoint($arr[$column], $column);
+            }
         }
     }
+} else {
+    // plain
+    $dataStr = $_GET["data"];
+    $dataValues = preg_split("/,/", $dataStr);
+    $DataSet->AddPoint("data", $xAxis);
+    foreach ($dataValues as $d) {
+        $DataSet->AddPoint($d, "data");
+    }
+    $sqlHash = md5($dataStr);
 }
 
-//$DataSet->ImportFromCSV("pChart/Sample/bulkdata.csv",",",array(1,2,3),FALSE,0);
 $DataSet->SetAbsciseLabelSerie($xAxis);
 $DataSet->AddAllSeries();
 $DataSet->RemoveSerie($xAxis);
-//$DataSet->SetSerieName("January", "Serie1");
-//$DataSet->SetSerieName("February", "Serie2");
-//$DataSet->SetSerieName("March", "Serie3");
 $DataSet->SetYAxisName($columnsStr);
-//$DataSet->SetYAxisUnit("µs");
 
 
 // Initialise the graph
