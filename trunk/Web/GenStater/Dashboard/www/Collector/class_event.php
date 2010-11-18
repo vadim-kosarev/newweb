@@ -59,8 +59,10 @@ class Event {
             $this->ensureTablesExist();
             $this->storeData();
             $dbh->commit();
+            return true;
         } catch (Exception $e) {
             $dbh->rollback();
+            return false;
         }
     }
 
@@ -168,7 +170,7 @@ class Event {
                     $this->addExtValue($dataTableKey, $value);
                     return $this->getExtDataID($dataTableKey, $value, false);
                 } else {
-                    return -1;
+                    return 1;//NULL
                 }
             }
         } else {
