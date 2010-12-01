@@ -21,6 +21,8 @@ $columnsStr = $_GET["data"];
 $xAxis = $_GET["xAxis"];
 $sqlHash = "___";
 
+$forceGenerate = false;
+
 if ($isSql) {
     $dbUrl = "mysql:host=$config_db_host;dbname=$config_db_name;port=$config_db_port";
     $dbh = new PDO($dbUrl, $config_db_user, $config_db_password);
@@ -40,6 +42,9 @@ if ($isSql) {
             }
         }
     }
+    
+    $forceGenerate = true;
+    
 } else {
     // plain
     $dataStr = $_GET["data"];
@@ -50,6 +55,12 @@ if ($isSql) {
     }
     $sqlHash = md5($dataStr);
 }
+
+$file = "../pChart/Cache/chart$sqlHash.png";
+
+
+
+if ( !file_exists($file) || $forceGenerate ) {
 
 $DataSet->SetAbsciseLabelSerie($xAxis);
 $DataSet->AddAllSeries();
@@ -85,7 +96,9 @@ $Test->drawLegend(75, 35, $DataSet->GetDataDescription(), 255, 255, 255);
 $Test->setFontProperties("pChart/Fonts/tahoma.ttf", 10);
 $Test->drawTitle(60, 22, $column, 50, 50, 50, 585);
 
-$file = "../pChart/Cache/chart$sqlHash.png";
 $Test->Render($file);
+}
+
+
 readfile($file);
 ?>

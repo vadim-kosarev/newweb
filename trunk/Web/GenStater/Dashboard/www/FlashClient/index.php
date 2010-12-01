@@ -4,7 +4,7 @@
    $callee = isset($_GET["callee"])?$_GET["callee"]:"442030514876";
    $visibleName = isset($_GET["visibleName"])?$_GET["visibleName"]:"visibleName";
    $run = isset($_GET["run"])?"true"==$_GET["run"]:false;
-
+   $regMode = isset($_GET["regMode"])?$_GET["regMode"]:"false";
 
 ?>
 <contentType="text/html;charset=UTF-8" language="java">
@@ -185,7 +185,7 @@ function showSecurityPanel(){
 }
 
 function trace(str){
-	document.getElementById('consoleTextArea').innerHTML = document.getElementById('consoleTextArea').innerHTML +'\n'+ str;	
+	document.getElementById('consoleTextArea').innerHTML = str + "\n" + document.getElementById('consoleTextArea').innerHTML;	
 }
 
 
@@ -203,27 +203,7 @@ if (getParams!=null){
 	}
 }
 
-flashvars.RTMP_SERVER_URL ='rtmp://<?=$rtmpServer?>:1935';
-flashvars.TRY_OTHER_PROTOCOLS ='true';
-flashvars.USE_LOADBALANCER='false';
-flashvars.LOAD_BALANCER_URL='http://10.0.2.2:1936';
-
-flashvars.LOAD_BALANCER_DATA_LOADING_TIMEOUT='1000';
-flashvars.LOAD_BALANCER_NODE_CONNECTION_TIMEOUT='5000';
-flashvars.LOAD_BALANCER_CHANGE_NODE_CONNECTION_INTERVAL='1000';
-flashvars.INCOMING_CALL_SOUND_URL = 'assets/incoming.mp3';
-flashvars.OUTGOING_CALL_SOUND_URL = 'assets/outgoing.mp3';
-flashvars.BUSY_SOUND_URL = 'assets/busy.mp3';
-flashvars.REGISTERED_SOUND_URL = 'assets/registered.mp3';
-flashvars.CALL_FINISHED_SOUND_URL = 'assets/finished.mp3';
-flashvars.IMAGE_URL = 'assets/cat.jpg';
-flashvars.REGMODE='true';
-flashvars.BANNER_URL = 'http://metr.com';
-flashvars.BG_COLOR = '#FFFFFF';
-flashvars.REPORT_URL = 'http://10.0.2.2:1937';
-flashvars.REPORT_CROSSDOMAIN = 'http://10.0.2.2:1935/crossdomain.xml';
-flashvars.KEEP_MOUSE_MOVE_LISTENER='false';
-
+flashvars.RTMP_DEFAULT_HOST ='<?=$rtmpServer?>';
 // LOG_LEVEL: NONE, ERROR, INFO, DEBUG, TRACE, FULL
 flashvars.LOG_LEVEL = 'INFO';
 
@@ -234,7 +214,7 @@ params.allowfullscreen = "true";
 params.allowscriptaccess = "always";
 var attributes = {};
 if (swfobject.hasFlashPlayerVersion("10.0.12")) {
-	swfobject.embedSWF("c.swf?v=160.4", "PHONE", "215", "138", "10.0.12", "expressInstall.swf", flashvars, params, attributes, positionStatus);
+	swfobject.embedSWF("http://c.test.metr.com/flashphone/c.swf?v=160.4&secret1=apdfiuapd8f7a0df7", "PHONE", "215", "138", "10.0.12", "expressInstall.swf", flashvars, params, attributes, positionStatus);
 } else if (swfobject.hasFlashPlayerVersion("6.0")) {
 	alert('Пожалуйста, скачайте последнюю версию Adobe Flash Player');
 } else {

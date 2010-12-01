@@ -42,10 +42,15 @@ td {
 }
 
 .sqlDataRow1 {
-    background-color: white;
+    background-color: #EEEEEE;
 }
 
 .sqlDataRow0 {
-    background-color: #e0e0e0;
+    background-color: #DDDDDD;
 }
 
+pre.td,pre.sql {
+    font-family:Arial,Helvetica,Tahoma,sans-serif;
+    font-size: 8pt;
+
+}
