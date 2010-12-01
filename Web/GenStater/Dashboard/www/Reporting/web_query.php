@@ -31,7 +31,7 @@ if ($stmt->execute()) {
 
 
 
-<div class="sqlTableHeader"><?= $qName ?></div>
+<div class="sqlTableHeader"><a href="html_query.php">HOME</a>: <?= $qName ?></div>
 
 
 
@@ -166,7 +166,7 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
             <?php if ($chartColumns) { ?>
             <img src="png_pChart.php?ts=<?= time() ?>&data=<?=$chartColumns?>&xAxis=<?=$xAxis?>&sql=<?= urlencode($qSQL) ?>"/>
             <?php } ?>
-            <pre class="sql"><?= $qSQL ?></pre></td>
+            <pre class="sql"><?= htmlentities($qSQL) ?></pre></td>
     </tr></table>
 <table class="sqlData">
     <?php
@@ -181,7 +181,7 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
                     while ($row = $stmt->fetch()) {
                         echo "<tr class='sqlDataRow$odd'>\n";
                         for ($i = 0; $i < $cCount; $i++) {
-                            echo "<td class='sqlDataRow$odd'>" . $row[$i] . "</td>\n";
+                            echo "<td class='sqlDataRow$odd'><pre class='td'>" . trim($row[$i]) . "</pre></td>\n";
                         }
                         echo "</tr>\n";
                         $odd = ($odd + 1) % 2;
