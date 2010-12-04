@@ -31,8 +31,10 @@ if ($stmt->execute()) {
 
 
 
-<div class="sqlTableHeader"><a href="html_query.php">HOME</a>: <?= $qName ?></div>
-
+<div class="sqlTableHeader"><a href="html_query.php">HOME</a>: <span id='queryNameDiv'><?= $qName ?></span></div>
+<script language="JavaScript">
+    document.title = document.getElementById('queryNameDiv').textContent;
+</script>
 
 
 
@@ -181,7 +183,7 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
                     while ($row = $stmt->fetch()) {
                         echo "<tr class='sqlDataRow$odd'>\n";
                         for ($i = 0; $i < $cCount; $i++) {
-                            echo "<td class='sqlDataRow$odd'><pre class='td'>" . trim($row[$i]) . "</pre></td>\n";
+                            echo "<td class='sqlDataRow$odd'><span class='td'>" . trim($row[$i]) . "</span></td>\n";
                         }
                         echo "</tr>\n";
                         $odd = ($odd + 1) % 2;
