@@ -14,6 +14,7 @@ $arrDataTypesMap = array(
     "uint" => "INT UNSIGNED NULL",
     "long" => "BIGINT UNSIGNED NULL",
     "str" => "VARCHAR(255) NULL",
+    "text" => "TEXT NULL",
     "tag" => $sql_IDDataType,
     "default" => "VARCHAR(255) NULL"
 );
