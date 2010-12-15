@@ -26,9 +26,19 @@ if ($stmt->execute()) {
     $chartColumns = $dArr["chart_columns"];
     $xAxis = $dArr["chart_x_axis"];
 }
+
 ?>
 
-
+<?php 
+// categories
+$categoryNColumns = 0;
+if (isset($_GET["categories"]))
+	$categoryNColumns = $_GET["categories"];
+$catValues = array();
+for ($i = 0 ; $i < $categoryNColumns ; $i++) {
+	$catValues[$i] = null;
+}
+?>
 
 
 <div class="sqlTableHeader"><a href="html_query.php">HOME</a>: <span id='queryNameDiv'><?= $qName ?></span></div>
@@ -41,8 +51,8 @@ if ($stmt->execute()) {
 <?php
 // populate with GET parameters
 
-if (isset($_GET["orderby"])) {
-    $qOrderBy = $_GET["orderby"];
+if (isset($_GET["_orderby"])) {
+    $qOrderBy = $_GET["_orderby"];
 }
 
 $whereClause = "";
@@ -133,7 +143,6 @@ if ($stmt->execute()) {
         <tr>
             <td>
                 <form action="<?= $_SERVER['REQUEST_URI'] ?>">
-                    <input type="hidden" name="id" value="<?= $queryID ?>"/>
                     <table>
                     <?php
                     for ($i = 0; $i < $cCount; $i++) {
@@ -149,7 +158,15 @@ if ($stmt->execute()) {
                         "' type='text' value='$formParamValue'/></td></tr>\n";
                     }
                     ?>
-                    <tr><td>ORDER BY</td><td><input name="orderby" value="<?= $qOrderBy ?>"/></td></tr>
+                    <tr><td>ORDER BY</td><td><input name="_orderby" value="<?= $qOrderBy ?>"/></td></tr>
+<?php 
+foreach (array_keys($_GET) as $key) {
+	$arr = array();
+    if (!preg_match("/(sql_)|(_)(.+)/i", $key, $arr)) {
+    	echo "<input type='hidden' name='$key' value='".$_GET[$key]."'/>\n"; 
+    }
+}
+?>                    
                 </table>
                 <input type="submit"/>
                 <pre class="hint">
@@ -181,9 +198,29 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
                     echo "</tr>";
 
                     while ($row = $stmt->fetch()) {
-                        echo "<tr class='sqlDataRow$odd'>\n";
+                    	$trCode = "<tr class='sqlDataRow$odd'>\n"; 
+                        echo $trCode;
                         for ($i = 0; $i < $cCount; $i++) {
-                            echo "<td class='sqlDataRow$odd'><span class='td'>" . trim($row[$i]) . "</span></td>\n";
+                        	
+                        	$v = trim($row[$i]);
+                        	if ( $i < $categoryNColumns ) {
+                        		
+                        		if ($catValues[$i] != $v) {
+                        			echo "</tr><tr>";
+                        			echo str_repeat("<td></td>", $i);
+                        			echo "<td colspan='".($cCount-$i)."' class='category$i'>$v</td></tr>";
+                        			$catValues[$i] = $v;
+                        			for ($j=$i+1;$j<$categoryNColumns;$j++) $catValues[$j] = null;
+                        			echo $trCode;
+                        		}
+                        		
+                        	} else {
+                        		
+                        		if ($i == $categoryNColumns) echo str_repeat("<td></td>", $i);
+                            	echo "<td class='sqlDataRow$odd'><span class='td'>" . $v . "</span></td>\n";
+                            	
+                        	}
+                            
                         }
                         echo "</tr>\n";
                         $odd = ($odd + 1) % 2;
