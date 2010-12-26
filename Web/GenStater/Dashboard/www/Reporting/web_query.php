@@ -115,7 +115,7 @@ if (strlen($qOrderBy) > 0) {
 }
 
 // LIMIT
-$limitAdd = " LIMIT 0,1000 ";
+$limitAdd = " LIMIT 0,10000 ";
 
 
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
@@ -185,7 +185,8 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
             <?php if ($chartColumns) { ?>
             <img src="png_pChart.php?ts=<?= time() ?>&data=<?=$chartColumns?>&xAxis=<?=$xAxis?>&sql=<?= urlencode($qSQL) ?>"/>
             <?php } ?>
-            <pre class="sql"><?= htmlentities($qSQL) ?></pre></td>
+            <!-- <pre class="sql"><?= htmlentities($qSQL) ?></pre> -->
+	    </td>
     </tr></table>
 <table class="sqlData">
     <?php
