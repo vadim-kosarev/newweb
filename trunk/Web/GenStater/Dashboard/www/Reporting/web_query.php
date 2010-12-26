@@ -139,6 +139,8 @@ $odd = 1;
 if ($stmt->execute()) {
     $cCount = $stmt->columnCount();
 ?>
+<a href="#" onClick="showhide('filterForm')">SHOW / HIDE Filter Form</a>
+ <div id="filterForm" style="display:none">
     <table>
         <tr>
             <td>
@@ -188,6 +190,14 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
             <!-- <pre class="sql"><?= htmlentities($qSQL) ?></pre> -->
 	    </td>
     </tr></table>
+    
+</div>
+    
+    
+    
+    
+    
+    
 <table class="sqlData">
     <?php
                     // columns headers
