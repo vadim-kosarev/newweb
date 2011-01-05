@@ -1,7 +1,13 @@
 <html>
 <head>
-<title>HEAD</title>
-<link href="style.css" rel="stylesheet" type="text/css">
+<title>Reporting</title>
+
+<style>
+/* style.css */
+		<?php readfile("style.css")?>
+/* style.css end */
+</style>
+
 <script language="javascript">
 <!--
 
