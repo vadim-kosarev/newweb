@@ -1,4 +1,4 @@
-AuthType Basic
-AuthName "Restricted Files"
-AuthUserFile /home/vkosarev/web/Reporting/.htpasswd
-Require valid-user
+#AuthType Basic
+#AuthName "Restricted Files"
+#AuthUserFile /home/vkosarev/web/Reporting/.htpasswd
+#Require valid-user
