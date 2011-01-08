@@ -37,6 +37,7 @@ div.category2 {
 	margin-top: 10pt;
 	margin-bottom: 5pt;
 	margin-left: 20pt;
+	color: darkred;
 }
 
 -->
