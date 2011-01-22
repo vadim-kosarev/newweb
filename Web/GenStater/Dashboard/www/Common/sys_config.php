@@ -7,4 +7,5 @@ $config_db_host = "localhost";
 $config_db_port = "3306";
 $config_db_name = "gen_stat";
 
+$reportDefaultLimit = 1000;
 ?>
