@@ -1,4 +1,5 @@
 <?php
+include_once("../Common/sys_config.php");
 
 class DefaultReportBuilder {
 
@@ -9,8 +10,10 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function processStmt($stmt, $dArr) {
+		$this->printPagesLinks();
 		$this->printFilterTable($stmt, $dArr);
 		$this->printDataTable($stmt, $dArr);
+		$this->printPagesLinks();
 	}
 
 
@@ -45,12 +48,12 @@ class DefaultReportBuilder {
 	 */
 	public function printDataTable($stmt, $dArr) {
 		$this->printDataHeader($stmt, $dArr);
-		
+
 		if (isset($_GET["categories"])) $this->categoryNColumns = $_GET["categories"];
 		for ($i = 0 ; $i < $this->categoryNColumns ; $i++) {
 			$this->catValues[$i] = null;
 		}
-		
+
 		while ($row = $stmt->fetch()) {
 			$this->printDataRow($stmt, $dArr, $row);
 		}
@@ -123,13 +126,81 @@ class DefaultReportBuilder {
 	public function printPageHeader($stmt, $dArr) {
 		$qName = $dArr["name"];
 		?>
-<div class="sqlTableHeader"><a href="html_query.php">HOME</a>: <span id='queryNameDiv'><?= $qName ?></span></div>
+<div class="sqlTableHeader"><a href="html_query.php">HOME</a>: <span
+	id='queryNameDiv'><?= $qName ?></span></div>
 <script language="JavaScript">
     document.title = document.getElementById('queryNameDiv').textContent;
 </script>
+		<?php
+	}
+
+	/**
+	 *
+	 */
+	public function printPagesLinks() {
+		global $reportDefaultLimit;
+		$currentLimit = $reportDefaultLimit;
+		$currentStart = 0;
+
+		if (isset($_GET["limit"])) {
+			$a = array();
+			if (preg_match("/(\d+),(\d+)/", $_GET["limit"], $a)) {
+				$currentStart = $a[1];
+				$currentLimit = $a[2];
+			}
+		}
+
+		//echo $currentStart  . " " . $currentLimit;
+
+		$pagesPerDirection = 15;
+
+		$firstPage1 = $currentStart - $currentLimit*$pagesPerDirection;
+		if ($firstPage1<0) $firstPage1 = 0;
+
+		$lastPage1 =  $currentStart + $currentLimit*$pagesPerDirection;
+		?>
+<script language="JavaScript">
+function applyLimit(limit) {
+	document.forms["filterForm"].elements["limit"].value=limit;
+	document.forms["filterForm"].submit();
+}
+</script>
+<div class="pagesLinks" align="right">
+		<?php
+		
+		echo "<b>Pages:</b>";
+		if($firstPage1!=0) {
+			$this->printPageLink(0,$currentLimit,$currentStart);
+			if ($firstPage1!=$currentLimit) echo "...";
+		} 
+			
+		for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
+			$this->printPageLink($i,$currentLimit,$currentStart);
+		}
+		?>
+</div>		
 		<?php 
 	}
 
+	/**
+	 * 
+	 * Enter description here ...
+	 * @param unknown_type $i
+	 * @param unknown_type $currentLimit
+	 * @param unknown_type $currentStart
+	 */
+	public function printPageLink($i,$currentLimit,$currentStart) {
+		$filterValue = "$i,$currentLimit";
+		$isCurrentPage = false;
+		if ($i==$currentStart) $isCurrentPage = true;
+		//echo " [";
+		if ($i>0) echo ",";
+		if (!$isCurrentPage) echo "<a href='#' onclick='applyLimit(\"$filterValue\");return false;'>";
+		//echo "$i.." . ($i+$currentLimit-1);
+		echo $i/$currentLimit+1;
+		if (!$isCurrentPage) echo "</a>";
+		//echo "] ";
+	}
 
 
 	/**
@@ -142,12 +213,13 @@ class DefaultReportBuilder {
 		$qOrderBy = $dArr["orderby"];
 		$chartColumns = "";
 		?>
+<br />
 <a href="#" onClick="showhide('filterForm')">SHOW / HIDE Filter Form</a>
 <div id="filterForm" style="display: none">
 <table>
 	<tr>
 		<td>
-		<form action="<?= $_SERVER['REQUEST_URI'] ?>">
+		<form action="<?= $_SERVER['REQUEST_URI'] ?>" name="filterForm">
 		<table>
 		<?php
 		for ($i = 0; $i < $cCount; $i++) {
@@ -189,8 +261,7 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
 		</td>
 		<td><?php if ($chartColumns) { ?> <img
 			src="png_pChart.php?ts=<?= time() ?>&data=<?=$chartColumns?>&xAxis=<?=$xAxis?>&sql=<?= urlencode($qSQL) ?>" />
-			<?php } ?> 
-		</td>
+			<?php } ?></td>
 	</tr>
 </table>
 

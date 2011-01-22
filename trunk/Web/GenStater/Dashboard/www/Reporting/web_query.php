@@ -8,14 +8,14 @@ $dbh = new PDO($dbUrl, $config_db_user, $config_db_password);
 // -------------- Query ID -----------------------
 $queryID = 1;
 if (isset($_GET["id"]))
-    $queryID = $_GET["id"];
-    
+$queryID = $_GET["id"];
+
 // -------------- Report Builder Class -----------------------
 $reportBuilderClass = "DefaultReportBuilder";
 if (isset($_GET["reportBuilderClass"]))
-	$reportBuilderClass = $_GET["reportBuilderClass"];
-	
-include_once("classes/" . $reportBuilderClass . ".php"); 
+$reportBuilderClass = $_GET["reportBuilderClass"];
+
+include_once("classes/" . $reportBuilderClass . ".php");
 
 $reportBuilderObject = null;
 eval("\$reportBuilderObject = new " . $reportBuilderClass . "();");
@@ -32,12 +32,12 @@ $xAxis = "";
 $dArr = array();
 
 if ($stmt->execute()) {
-    $dArr = $stmt->fetch();
-    $qSQL = $dArr["sql"];
-    $qName = $dArr["name"];
-    $qOrderBy = $dArr["orderby"];
-    $chartColumns = $dArr["chart_columns"];
-    $xAxis = $dArr["chart_x_axis"];
+	$dArr = $stmt->fetch();
+	$qSQL = $dArr["sql"];
+	$qName = $dArr["name"];
+	$qOrderBy = $dArr["orderby"];
+	$chartColumns = $dArr["chart_columns"];
+	$xAxis = $dArr["chart_x_axis"];
 }
 
 $reportBuilderObject->printPageHeader($stmt, $dArr);
@@ -45,70 +45,74 @@ $reportBuilderObject->printPageHeader($stmt, $dArr);
 // populate with GET parameters
 
 if (isset($_GET["_orderby"])) {
-    $qOrderBy = $_GET["_orderby"];
+	$qOrderBy = $_GET["_orderby"];
 }
 
 $whereClause = "";
 $whereClauseEmpty = true;
 foreach (array_keys($_GET) as $key) {
-    $arr = array();
-    if (preg_match("/(sql_)(.+)/i", $key, $arr)) {
-        if (!isset($_GET[$key]) || $_GET[$key] == "")
-            continue;
-        $val = $_GET[$key];
-        $p = paramGetToSQL($arr[2]);
-        $p = findFieldByAlias($p, $qSQL);
-        if ($whereClauseEmpty) {
-            $whereClause .= " WHERE \n";
-        }
-        if (!$whereClauseEmpty) {
-            $whereClause .= " AND \n";
-        }
+	$arr = array();
+	if (preg_match("/(sql_)(.+)/i", $key, $arr)) {
+		if (!isset($_GET[$key]) || $_GET[$key] == "")
+		continue;
+		$val = $_GET[$key];
+		$p = paramGetToSQL($arr[2]);
+		$p = findFieldByAlias($p, $qSQL);
+		if ($whereClauseEmpty) {
+			$whereClause .= " WHERE \n";
+		}
+		if (!$whereClauseEmpty) {
+			$whereClause .= " AND \n";
+		}
 
-        $valSrc = $val;
-        $vals = preg_split("/\,/", $valSrc);
-        $isOrAdding = false;
-        $valsWhereAdd = "";
-        
-  foreach ($vals as $val) {
+		$valSrc = $val;
+		$vals = preg_split("/\,/", $valSrc);
+		$isOrAdding = false;
+		$valsWhereAdd = "";
 
-        $arr = array();
-        $whereAdd = "";
-        
-        $whereAdd .= $p . " = '" . $val . "'";
+		foreach ($vals as $val) {
 
-        if (strpos($val, "*") !== false) {
-            $val = str_replace("*", "%", $val);
-            $whereAdd = $p . " LIKE '" . $val . "'";
-        } else if (preg_match("/(.+)\.\.\.(.+)/", $val, $arr)) {
-            $whereAdd = $p . " >= '" . $arr[1] . "' AND " . $p . " <= '" . $arr[2] . "'";
-        } else if (preg_match("/(.+)\.\.\./", $val, $arr)) {
-            $val = $arr[1];
-            $whereAdd = $p . " >= '" . $val . "'";
-        } else if (preg_match("/\.\.\.(.+)/", $val, $arr)) {
-            $val = $arr[1];
-            $whereAdd = $p . " <= '" . $val . "'";
-        }
+			$arr = array();
+			$whereAdd = "";
 
-        $valsWhereAdd .= ($isOrAdding?" OR ":"") . $whereAdd;
+			$whereAdd .= $p . " = '" . $val . "'";
 
-        $isOrAdding = true;
-  }
+			if (strpos($val, "*") !== false) {
+				$val = str_replace("*", "%", $val);
+				$whereAdd = $p . " LIKE '" . $val . "'";
+			} else if (preg_match("/(.+)\.\.\.(.+)/", $val, $arr)) {
+				$whereAdd = $p . " >= '" . $arr[1] . "' AND " . $p . " <= '" . $arr[2] . "'";
+			} else if (preg_match("/(.+)\.\.\./", $val, $arr)) {
+				$val = $arr[1];
+				$whereAdd = $p . " >= '" . $val . "'";
+			} else if (preg_match("/\.\.\.(.+)/", $val, $arr)) {
+				$val = $arr[1];
+				$whereAdd = $p . " <= '" . $val . "'";
+			}
+
+			$valsWhereAdd .= ($isOrAdding?" OR ":"") . $whereAdd;
+
+			$isOrAdding = true;
+		}
 
 
-        $whereClause .= "(" . $valsWhereAdd . ")";
-        $whereClauseEmpty = false;
-    }
+		$whereClause .= "(" . $valsWhereAdd . ")";
+		$whereClauseEmpty = false;
+	}
 }
 
 // ORDER BY
 $orderByAdd = "";
 if (strlen($qOrderBy) > 0) {
-    $orderByAdd = " ORDER BY " . $qOrderBy;
+	$orderByAdd = " ORDER BY " . $qOrderBy;
 }
 
 // LIMIT
-$limitAdd = " LIMIT 0,10000 ";
+if (isset($_GET["limit"])) {
+	$limitAdd = " LIMIT " . $_GET["limit"] . " ";
+} else {
+	$limitAdd = " LIMIT 0,$reportDefaultLimit ";
+}
 
 
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
@@ -128,7 +132,7 @@ $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
 $stmt = $dbh->prepare($qSQL);
 
 // execute and serialize results
-if ($stmt->execute()) {        
+if ($stmt->execute()) {
 	$reportBuilderObject->processStmt($stmt, $dArr);
-}	
+}
 ?>
