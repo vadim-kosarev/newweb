@@ -10,8 +10,8 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function processStmt($stmt, $dArr) {
-		$this->printPagesLinks();
 		$this->printFilterTable($stmt, $dArr);
+		$this->printPagesLinks();
 		$this->printDataTable($stmt, $dArr);
 		$this->printPagesLinks();
 	}
@@ -245,6 +245,9 @@ function applyLimit(limit) {
 				if (!preg_match("/(sql_)|(_)(.+)/i", $key, $arr)) {
 					echo "<input type='hidden' name='$key' value='".$_GET[$key]."'/>\n";
 				}
+			}
+			if (!isset($_GET["limit"])) {
+				?><input type="hidden" name="limit"/><?php 
 			}
 			?>
 		</table>
