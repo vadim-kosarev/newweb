@@ -209,6 +209,7 @@ function applyLimit(limit) {
 	 * @param unknown_type $stmt
 	 */
 	public function printFilterTable($stmt, $dArr) {
+	        global $reportDefaultLimit;
 		$cCount = $stmt->columnCount();
 		$qOrderBy = $dArr["orderby"];
 		$chartColumns = "";
@@ -247,7 +248,7 @@ function applyLimit(limit) {
 				}
 			}
 			if (!isset($_GET["limit"])) {
-				?><input type="hidden" name="limit"/><?php 
+				?><input type="hidden" name="limit" value="0,<?=$reportDefaultLimit?>"/><?php 
 			}
 			?>
 		</table>
