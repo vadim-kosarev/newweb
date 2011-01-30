@@ -9,6 +9,7 @@ class PlainReportBuilder extends DefaultReportBuilder {
 	 */
 	public function processStmt($stmt, $dArr) {
 		$this->printDataTable($stmt, $dArr);
+		$this->printPagesLinks();		
 	}
 
 	
