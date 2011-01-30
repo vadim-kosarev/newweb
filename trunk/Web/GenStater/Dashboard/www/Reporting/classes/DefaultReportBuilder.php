@@ -152,7 +152,7 @@ class DefaultReportBuilder {
 
 		//echo $currentStart  . " " . $currentLimit;
 
-		$pagesPerDirection = 15;
+		$pagesPerDirection = 5;
 
 		$firstPage1 = $currentStart - $currentLimit*$pagesPerDirection;
 		if ($firstPage1<0) $firstPage1 = 0;
