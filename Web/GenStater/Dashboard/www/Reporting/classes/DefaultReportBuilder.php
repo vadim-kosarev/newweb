@@ -1,6 +1,6 @@
 <?php
 include_once("../Common/sys_config.php");
-
+include_once("../Common/sys_db.php");
 class DefaultReportBuilder {
 
 	/**
@@ -66,6 +66,91 @@ class DefaultReportBuilder {
 	protected $categoryNColumns = 0;
 	protected $catValues = array();
 
+	public function getQueryVal($key, $row) {
+		$m = array();
+		if (preg_match("/\\$(\d+)/", $key, $m)) {
+			return $row[$m[1]];
+		} else {
+			return $key;
+		}
+	}
+
+
+	public function getSQL($queryID) {
+		global $dbh;
+		$stmt = $dbh->prepare("SELECT * FROM sys_queries WHERE query_id = :queryID");
+		$stmt->bindValue(":queryID", $queryID);
+		if ($stmt->execute()) {
+			$dArr = $stmt->fetch();
+			$qSQL = $dArr["sql"];
+			return $qSQL;
+		} else {
+			return "SELECT 'ERROR'";
+		}
+	}
+
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $queryArr
+	 * @param unknown_type $row
+	 */
+	public function execQuery($queryArr, $row) {
+		$qID = $queryArr[0];
+
+		$querySQL = $this->getSQL($qID);
+
+		global $dbh;
+		$stmt = $dbh->prepare($querySQL);
+
+		$arrSize = count($queryArr);
+		for ($i=1;$i<$arrSize;$i++) {
+			$val = $this->getQueryVal($queryArr[$i], $row);
+			$stmt->bindValue(":ARG".$i, $val);
+		}
+
+		if ($stmt->execute()) {
+			$cc = $stmt->columnCount();
+			while ($row = $stmt->fetch()) {
+				for ($i=0;$i<$cc;$i++) {
+					echo $row[$i];
+				}
+			}
+				
+		}
+	}
+
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $stmt
+	 * @param unknown_type $dArr
+	 * @param unknown_type $row
+	 * @param unknown_type $v
+	 */
+	public function printDataCell($stmt, $dArr, $row, $v) {
+		$extQueries = array();
+		$matches = preg_match_all ("/\\{\\{\d+[^\\{\\}]*\\}\\}/", $v, $extQueries);
+		if ($matches == 0) {
+			echo $v;
+		} else {
+			$cCount = $stmt->columnCount();
+			$strCInd = 0;
+			for ($i = 0 ; $i < $matches ; $i++ ) {
+				$strMatch = $extQueries[0][$i];
+				$queryArr = array();
+				preg_match_all("/([^,{}]+)/", $strMatch, $queryArr);
+				
+				$sPos = strpos($v, $strMatch, $strCInd);
+				echo substr($v, $strCInd, $sPos-$strCInd);
+				$this->execQuery($queryArr[0], $row);
+				$strCInd = $sPos + strlen($strMatch);
+			}
+			echo substr($v, $strCInd);
+		}
+
+	}
+
 	/**
 	 *
 	 * Enter description here ...
@@ -97,7 +182,9 @@ class DefaultReportBuilder {
 			} else {
 
 				if ($i == $this->categoryNColumns) echo str_repeat("<td></td>", $i);
-				echo "<td class='sqlDataRow" . $this->odd . "'><span class='td'>" . $v . "</span></td>\n";
+				echo "<td class='sqlDataRow" . $this->odd . "'><span class='td'>";
+				$this->printDataCell($stmt, $dArr, $row, $v);
+				echo "</span></td>\n";
 
 			}
 
@@ -165,25 +252,23 @@ function applyLimit(limit) {
 	document.forms["filterForm"].submit();
 }
 </script>
-<div class="pagesLinks" align="right">
-		<?php
-		
-		echo "<b>Pages:</b>";
-		if($firstPage1!=0) {
-			$this->printPageLink(0,$currentLimit,$currentStart);
-			if ($firstPage1!=$currentLimit) echo "...";
-		} 
-			
-		for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
-			$this->printPageLink($i,$currentLimit,$currentStart);
-		}
-		?>
-</div>		
-		<?php 
+<div class="pagesLinks" align="right"><?php
+
+echo "<b>Pages:</b>";
+if($firstPage1!=0) {
+	$this->printPageLink(0,$currentLimit,$currentStart);
+	if ($firstPage1!=$currentLimit) echo "...";
+}
+
+for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
+	$this->printPageLink($i,$currentLimit,$currentStart);
+}
+?></div>
+<?php
 	}
 
 	/**
-	 * 
+	 *
 	 * Enter description here ...
 	 * @param unknown_type $i
 	 * @param unknown_type $currentLimit
@@ -209,7 +294,7 @@ function applyLimit(limit) {
 	 * @param unknown_type $stmt
 	 */
 	public function printFilterTable($stmt, $dArr) {
-	        global $reportDefaultLimit;
+		global $reportDefaultLimit;
 		$cCount = $stmt->columnCount();
 		$qOrderBy = $dArr["orderby"];
 		$chartColumns = "";
@@ -248,7 +333,9 @@ function applyLimit(limit) {
 				}
 			}
 			if (!isset($_GET["limit"])) {
-				?><input type="hidden" name="limit" value="0,<?=$reportDefaultLimit?>"/><?php 
+				?>
+			<input type="hidden" name="limit" value="0,<?=$reportDefaultLimit?>" />
+			<?php
 			}
 			?>
 		</table>
