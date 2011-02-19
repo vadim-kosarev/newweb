@@ -2,7 +2,7 @@
     include_once("class_event.php");
     
     $event = new Event();
-    $dArray = $_GET;
+    $dArray = array_merge($_GET, $_POST);
     $dArray["d_ext_sysRemoteAddr"] = $_SERVER["REMOTE_ADDR"];
     $event->init($dArray);
     
