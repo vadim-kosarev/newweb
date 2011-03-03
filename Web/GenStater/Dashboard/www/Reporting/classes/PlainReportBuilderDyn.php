@@ -10,13 +10,13 @@ class PlainReportBuilderDyn extends PlainReportBuilder {
 		?>
 <style>
 <!--
-
 div.category0 {
+	
 }
 
 div.category1 {
-    border-top: 1px solid black;
-    padding-top: 10pt;
+	border-top: 1px solid black;
+	padding-top: 10pt;
 	margin-top: 10pt;
 }
 
@@ -26,14 +26,20 @@ div.category2 {
 	margin-left: 20pt;
 	color: darkred;
 }
-
 -->
-</style>		
-		<?php 
+</style>
+		<?php
 	}
 
 	private $divOpen = false;
-	
+
+	protected function showData() {
+		if (array_key_exists("showData", $_GET) &&  $_GET["showData"] == "false") {
+			return false;
+		}
+		return true;
+	}
+
 	protected function getDivID($i) {
 		$res = "";
 		$cCount =  $this->categoryNColumns;
@@ -42,7 +48,7 @@ div.category2 {
 		}
 		return $res;
 	}
-	
+
 	/**
 	 * (non-PHPdoc)
 	 * @see DefaultReportBuilder::printDataRow()
@@ -52,34 +58,39 @@ div.category2 {
 		for ($i = 0; $i < $cCount; $i++) {
 			$v = trim($row[$i]);
 			if ( $i < $this->categoryNColumns ) {
-				
+
 				if ($this->catValues[$i] != $v) {
 					if ($this->divOpen) {
 						echo "</div>";
 						$this->divOpen = false;
 					}
-						
+
 					$this->catValues[$i] = $v;
 					for ($j = $i+1 ; $j < $this->categoryNColumns; $j++) $this->catValues[$j] = null;
-					
+
 					if ( $i == $this->categoryNColumns-1 ) {
-						
+
 						$divId = $this->getDivID($i);
-						$addHtml = " <small>[<a href=# onclick='showhide(\"$divId\");return false;'>...</a>]</small>";
+						$addHtml = "";
+						if ($this->showData()) {
+							$addHtml = " <small>[<a href=# onclick='showhide(\"$divId\");return false;'>...</a>]</small>";
+						}
 						echo "<div class='category$i'>$v$addHtml</div>";
 						echo "<div id='$divId' style='display: none;'>";
+
 						$this->divOpen = true;
-						
+
 					} else {
 						echo "<div class='category$i'>$v</div>";
 					}
 				}
-				
+
 			} else {
+				if ($this->showData())
 				echo " $v ";
 			}
 		}
-		echo "<br/>\n";
+		if ($this->showData()) echo "<br/>\n";
 
 	}
 
