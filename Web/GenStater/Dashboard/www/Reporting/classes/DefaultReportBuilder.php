@@ -25,6 +25,9 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printDataHeader($stmt, $dArr) {
+		?>
+<!-- <?= $qSQL ?> -->		
+		<?php
 		// columns headers
 		echo "<table class='sqlData'>";
 		echo "<tr class='sqlDataHeader'>\n";
