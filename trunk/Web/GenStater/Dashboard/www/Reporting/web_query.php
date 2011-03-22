@@ -116,19 +116,7 @@ if (isset($_GET["limit"])) {
 
 
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
-?>
 
-
-
-
-
-<!-- <?= $qSQL ?> -->
-
-
-
-
-
-<?php
 $stmt = $dbh->prepare($qSQL);
 
 // execute and serialize results
