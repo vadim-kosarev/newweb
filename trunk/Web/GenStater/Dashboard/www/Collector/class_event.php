@@ -157,7 +157,7 @@ class Event {
      * @param <type> $dataTableKey
      * @param <type> $value 
      */
-    private function getExtDataID($dataTableKey, $value, $insertIfNotFound = true) {
+    public function getExtDataID($dataTableKey, $value, $insertIfNotFound = true) {
         $fName = $this->getFieldDataName($dataTableKey);
         $extTableName = $this->getExtTableName($fName);
         $sql = "SELECT id FROM `$extTableName` WHERE d_str_name=:STRVAL";
