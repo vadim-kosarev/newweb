@@ -75,6 +75,13 @@ foreach (array_keys($_GET) as $key) {
 			$arr = array();
 			$whereAdd = "";
 
+			$isNegative = false;
+			if (startsWith($val, '!')) {
+                           $val = substr($val, 1);
+                           $isNegative = true;
+                        }
+
+
 			$whereAdd .= $p . " = '" . $val . "'";
 
 			if (strpos($val, "*") !== false) {
@@ -88,6 +95,10 @@ foreach (array_keys($_GET) as $key) {
 			} else if (preg_match("/\.\.\.(.+)/", $val, $arr)) {
 				$val = $arr[1];
 				$whereAdd = $p . " <= '" . $val . "'";
+			}
+
+                        if ($isNegative) {
+				$whereAdd = " NOT ( " . $whereAdd . " ) ";
 			}
 
 			$valsWhereAdd .= ($isOrAdding?" OR ":"") . $whereAdd;
@@ -116,6 +127,8 @@ if (isset($_GET["limit"])) {
 
 
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
+
+// echo "<pre>" . $qSQL . "</pre>";
 
 $stmt = $dbh->prepare($qSQL);
 
