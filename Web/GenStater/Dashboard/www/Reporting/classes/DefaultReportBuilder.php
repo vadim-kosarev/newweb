@@ -351,6 +351,7 @@ sql_X : ...V2     =>   X <= "V2"
 sql_X : V1...V2   =>   X >= "V1" AND X <= "V2"
 
 sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
+sql_X : !RRR      =>   NOT ( RRR )
                 </pre></form>
 		</td>
 		<td><?php if ($chartColumns) { ?> <img
