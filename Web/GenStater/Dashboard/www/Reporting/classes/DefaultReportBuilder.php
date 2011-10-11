@@ -309,7 +309,7 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 	<tr>
 		<td>
 		<form action="<?= $_SERVER['REQUEST_URI'] ?>" name="filterForm">
-		<table>
+		<table class="filterForm">
 		<?php
 		for ($i = 0; $i < $cCount; $i++) {
 			$cMeta = $stmt->getColumnMeta($i);
@@ -319,14 +319,14 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 			if (isset($_GET[$formParamName])) {
 				$formParamValue = $_GET[$formParamName];
 			}
-			echo "<tr><td>" . $formParamName . "</td>";
-			echo "<td><input name='" . my_encode($formParamName) .
-                        "' type='text' value='$formParamValue'/></td></tr>\n";
+			echo "<tr class='filterForm'><td class='filterForm'>" . $formParamName . "</td>";
+			echo "<td class='filterForm'><input name='" . my_encode($formParamName) .
+                        "' type='text' value='$formParamValue' class='filterForm'/></td></tr>\n";
 		}
 		?>
-			<tr>
-				<td>ORDER BY</td>
-				<td><input name="_orderby" value="<?= $qOrderBy ?>" /></td>
+			<tr class='filterForm'>
+				<td class='filterForm'>ORDER BY</td>
+				<td class='filterForm'><input name="_orderby" value="<?= $qOrderBy ?>" class='filterForm' /></td>
 			</tr>
 			<?php
 			foreach (array_keys($_GET) as $key) {
