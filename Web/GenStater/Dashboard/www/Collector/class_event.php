@@ -16,6 +16,7 @@ $arrDataTypesMap = array(
     "str" => "VARCHAR(255) NULL",
     "text" => "TEXT NULL",
     "tag" => $sql_IDDataType,
+    "blob" => "MEDIUMBLOB NULL",
     "default" => "VARCHAR(255) NULL"
 );
 
