@@ -10,12 +10,20 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function processStmt($stmt, $dArr) {
+		$this->printHeader($dArr);
 		$this->printFilterTable($stmt, $dArr);
 		$this->printPagesLinks();
 		$this->printDataTable($stmt, $dArr);
 		$this->printPagesLinks();
 	}
 
+	/**
+	 * Enter description here ...
+	 * @param unknown_type $dArr
+	 */
+	public function printHeader($dArr) {
+		echo $dArr["header"];
+	}
 
 
 	/**
@@ -115,7 +123,7 @@ class DefaultReportBuilder {
 		if ($stmt->execute()) {
 			$cc = $stmt->columnCount();
 			while ($row = $stmt->fetch()) {
-				for ($i=0;$i<$cc;$i++) {
+				for ( $i=0 ; $i < $cc ; $i++ ) {
 					echo $row[$i];
 				}
 			}
