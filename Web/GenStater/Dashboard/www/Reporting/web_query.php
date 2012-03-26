@@ -30,6 +30,8 @@ $qOrderBy = "";
 $chartColumns = "";
 $xAxis = "";
 $dArr = array();
+$whereClause = "";
+
 
 if ($stmt->execute()) {
 	$dArr = $stmt->fetch();
@@ -38,6 +40,7 @@ if ($stmt->execute()) {
 	$qOrderBy = $dArr["orderby"];
 	$chartColumns = $dArr["chart_columns"];
 	$xAxis = $dArr["chart_x_axis"];
+	$whereClause = $dArr["where"];
 }
 
 $reportBuilderObject->printPageHeader($stmt, $dArr);
@@ -48,8 +51,14 @@ if (isset($_GET["_orderby"])) {
 	$qOrderBy = $_GET["_orderby"];
 }
 
-$whereClause = "";
 $whereClauseEmpty = true;
+
+if ($whereClause) {
+	// if we read it from DB Table
+	$whereClause = " WHERE \n ( " . $whereClause . " ) ";
+	$whereClauseEmpty = false;
+}
+
 foreach (array_keys($_GET) as $key) {
 	$arr = array();
 	if (preg_match("/(sql_)(.+)/i", $key, $arr)) {
