@@ -22,7 +22,9 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printHeader($dArr) {
-		echo $dArr["header"];
+		?>
+<div class="reportHeader"><?php echo $dArr["header"]; ?></div>
+	    <?php 
 	}
 
 
@@ -61,6 +63,7 @@ class DefaultReportBuilder {
 		$this->printDataHeader($stmt, $dArr);
 
 		if (isset($_GET["categories"])) $this->categoryNColumns = $_GET["categories"];
+		
 		for ($i = 0 ; $i < $this->categoryNColumns ; $i++) {
 			$this->catValues[$i] = null;
 		}
@@ -68,6 +71,7 @@ class DefaultReportBuilder {
 		while ($row = $stmt->fetch()) {
 			$this->printDataRow($stmt, $dArr, $row);
 		}
+		
 		$this->printDataFooter($stmt, $dArr);
 	}
 
@@ -224,11 +228,8 @@ class DefaultReportBuilder {
 	public function printPageHeader($stmt, $dArr) {
 		$qName = $dArr["name"];
 		?>
-<div class="sqlTableHeader"><a href="html_query.php">HOME</a>: <span
-	id='queryNameDiv'><?= $qName ?></span></div>
-<script language="JavaScript">
-    document.title = document.getElementById('queryNameDiv').textContent;
-</script>
+<div class="sqlTableHeader"><span id='queryNameDiv'><?= $qName ?></span></div>
+<script language="JavaScript">document.title = document.getElementById('queryNameDiv').textContent;</script>
 		<?php
 	}
 
@@ -247,8 +248,6 @@ class DefaultReportBuilder {
 				$currentLimit = $a[2];
 			}
 		}
-
-		//echo $currentStart  . " " . $currentLimit;
 
 		$pagesPerDirection = 5;
 
