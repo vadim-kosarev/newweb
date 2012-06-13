@@ -10,7 +10,6 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function processStmt($stmt, $dArr) {
-		$this->printHeader($dArr);
 		$this->printFilterTable($stmt, $dArr);
 		$this->printPagesLinks();
 		$this->printDataTable($stmt, $dArr);
@@ -41,9 +40,6 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printDataHeader($stmt, $dArr) {
-		?>
-<!-- <?= $qSQL ?> -->		
-		<?php
 		// columns headers
 		echo "<table class='sqlData'>";
 		echo "<tr class='sqlDataHeader'>\n";
@@ -232,10 +228,10 @@ class DefaultReportBuilder {
 
 
 	public function printPageHeader($stmt, $dArr) {
+		$this->printHeader($dArr);
 		$qName = $dArr["name"];
 		?>
-<div class="sqlTableHeader"><span id='queryNameDiv'><?= $qName ?></span></div>
-<script language="JavaScript">document.title = document.getElementById('queryNameDiv').textContent;</script>
+<script language="JavaScript">document.title = <?php echo json_encode($qName); ?></script>
 		<?php
 	}
 
