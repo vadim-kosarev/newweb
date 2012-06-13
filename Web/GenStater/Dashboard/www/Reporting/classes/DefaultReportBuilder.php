@@ -15,6 +15,7 @@ class DefaultReportBuilder {
 		$this->printPagesLinks();
 		$this->printDataTable($stmt, $dArr);
 		$this->printPagesLinks();
+		$this->printFooter($dArr);
 	}
 
 	/**
@@ -22,12 +23,17 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printHeader($dArr) {
-		?>
-<div class="reportHeader"><?php echo $dArr["header"]; ?></div>
-	    <?php 
+		echo $dArr["header"]; 
 	}
 
-
+	/**
+	 * Enter description here ...
+	 * @param unknown_type $dArr
+	 */
+	public function printFooter($dArr) {
+		echo $dArr["footer"]; 
+	}
+	
 	/**
 	 *
 	 * Enter description here ...
