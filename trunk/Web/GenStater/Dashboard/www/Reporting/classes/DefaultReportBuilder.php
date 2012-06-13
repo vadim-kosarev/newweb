@@ -309,6 +309,9 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 		global $reportDefaultLimit;
 		$cCount = $stmt->columnCount();
 		$qOrderBy = $dArr["orderby"];
+		if (isset($_GET["_orderby"])) {
+				$qOrderBy = $_GET["_orderby"];
+		}
 		$chartColumns = "";
 		?>
 <br />
