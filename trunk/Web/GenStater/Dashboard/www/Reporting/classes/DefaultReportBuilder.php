@@ -80,9 +80,35 @@ class DefaultReportBuilder {
 		$cCount = $stmt->columnCount();
 		for ($i = 0; $i < $cCount; $i++) {
 			$cMeta = $stmt->getColumnMeta($i);
-			echo "<th class='sqlDataHeader'>" . $cMeta["name"] . "</th>\n";
+			if ($this->isColumnVisible($i, $stmt, $dArr)) {
+				echo "<th class='sqlDataHeader'>" . $this->getColumnTitle($i, $stmt, $dArr, $cMeta["name"]) . "</th>\n";
+			}
 		}
 		echo "</tr>";
+	}
+
+	public function isColumnVisible($i, $stmt, $dArr) {
+		if (!array_key_exists("columns", $dArr)) {
+			return true;
+		}
+		$columnsArr = preg_split("/[,;]/", $dArr["columns"]);
+		if (count($columnsArr) < 1 || $i >= count($columnsArr)) { 
+			return true;
+		}
+		return ($columnsArr[$i] != "hidden");
+		
+	}
+	
+	public function getColumnTitle($i, $stmt, $dArr, $dfltValue) {
+		if (!array_key_exists("columns", $dArr)) {
+			return $dfltValue;
+		}
+		$columnsArr = preg_split("/[,;]/", $dArr["columns"]);
+		if (count($columnsArr) < 1 || $i >= count($columnsArr) || $columnsArr[$i] == "*") { 
+			return $dfltValue;
+		}
+		
+		return $columnsArr[$i];
 	}
 
 
@@ -108,6 +134,12 @@ class DefaultReportBuilder {
 		$this->printDataFooter($stmt, $dArr);
 	}
 
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $key
+	 * @param unknown_type $row
+	 */
 	public function getQueryVal($key, $row) {
 		$m = array();
 		if (preg_match("/\\$(\d+)/", $key, $m)) {
@@ -118,6 +150,11 @@ class DefaultReportBuilder {
 	}
 
 
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $queryID
+	 */
 	public function getSQL($queryID) {
 		global $dbh;
 		$stmt = $dbh->prepare("SELECT * FROM sys_queries WHERE query_id = :queryID");
@@ -224,9 +261,11 @@ class DefaultReportBuilder {
 			} else {
 
 				if ($i == $this->categoryNColumns) echo str_repeat("<td></td>", $i);
-				echo "<td class='sqlDataRow" . $this->odd . "'><span class='td'>";
-				$this->printDataCell($stmt, $dArr, $row, $v);
-				echo "</span></td>\n";
+				if ($this->isColumnVisible($i, $stmt, $dArr)) {
+					echo "<td class='sqlDataRow" . $this->odd . "'><span class='td'>";
+					$this->printDataCell($stmt, $dArr, $row, $v);
+					echo "</span></td>\n";
+				}
 
 			}
 
