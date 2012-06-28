@@ -128,8 +128,11 @@ if (strlen($qOrderBy) > 0) {
 }
 
 // LIMIT
+$limitAdd = "";
 if (isset($_GET["limit"])) {
-	$limitAdd = " LIMIT " . $_GET["limit"] . " ";
+	if ($_GET["limit"] != "no") {
+		$limitAdd = " LIMIT " . $_GET["limit"] . " ";
+	}
 } else {
 	$limitAdd = " LIMIT 0,$reportDefaultLimit ";
 }
@@ -144,5 +147,8 @@ $stmt = $dbh->prepare($qSQL);
 // execute and serialize results
 if ($stmt->execute()) {
 	$reportBuilderObject->processStmt($stmt, $dArr);
+} else {
+	echo "Error during execute query";
+	echo "<pre>" . $qSQL . "</pre>";
 }
 ?>
