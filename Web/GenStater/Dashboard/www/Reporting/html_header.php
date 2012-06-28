@@ -43,4 +43,19 @@ function showhide(layer_ref) {
 </head>
 <body>
 		<div id="progressDiv" style="font-family:Tahoma;width:200px;height:100px;position:absolute;left:50%;top:50%;margin-left:-100px;margin-top:-50px;"><img src="progress.gif" /> Please wait...</div>
-<?php flush(); ?>
+<?php 
+
+function mflush(){
+    echo(str_repeat(' ',256));
+    // check that buffer is actually set before flushing
+    if (ob_get_length()){            
+        @ob_flush();
+        @flush();
+        @ob_end_flush();
+    }    
+    @ob_start();
+}
+
+mflush(); 
+?>
+
