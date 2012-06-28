@@ -87,6 +87,13 @@ class DefaultReportBuilder {
 		echo "</tr>";
 	}
 
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $i
+	 * @param unknown_type $stmt
+	 * @param unknown_type $dArr
+	 */
 	public function isColumnVisible($i, $stmt, $dArr) {
 		if (!array_key_exists("columns", $dArr)) {
 			return true;
@@ -99,8 +106,16 @@ class DefaultReportBuilder {
 
 	}
 
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $i
+	 * @param unknown_type $stmt
+	 * @param unknown_type $dArr
+	 * @param unknown_type $dfltValue
+	 */
 	public function getColumnTitle($i, $stmt, $dArr, $dfltValue) {
-		if (!array_key_exists("columns", $dArr)) {
+		if (!array_key_exists("columns", $dArr) || !$dArr["columns"]) {
 			return $dfltValue;
 		}
 		$columnsArr = preg_split("/[,;]/", $dArr["columns"]);
@@ -249,7 +264,8 @@ class DefaultReportBuilder {
 
 		$cCount = $stmt->columnCount();
 		$cVisibleCount = $this->getVisibleColumnsCount($stmt, $dArr, 0, $cCount);
-
+		$cVisibleNC = $this->getVisibleColumnsCount($stmt, $dArr, 0, $this->categoryNColumns);
+		
 		$trCode = "<tr class='sqlDataRow" . $this->odd . "'>\n";
 
 		echo $trCode;
@@ -257,21 +273,27 @@ class DefaultReportBuilder {
 
 			if ($this->isColumnVisible($i, $stmt, $dArr)) {
 
+				$visibleI = $this->getVisibleColumnsCount($stmt, $dArr, 0, $i);
+				
 				$v = trim($row[$i]);
 				if ( $i < $this->categoryNColumns ) {
 
 					if ($this->catValues[$i] != $v) {
 						echo "</tr><tr>";
-						echo str_repeat("<td></td>", $this->getVisibleColumnsCount($stmt, $dArr, 0, $i));
-						echo "<td colspan='".($this->getVisibleColumnsCount($stmt, $dArr, $i, $cCount))."' class='category$i'>$v</td></tr>";
+						echo str_repeat("<td></td>", $visibleI);
+						echo "<td colspan='".($cVisibleCount-$visibleI)."' class='category$i'>$v</td></tr>";
 						$this->catValues[$i] = $v;
 						for ($j=$i+1;$j<$this->categoryNColumns;$j++) $this->catValues[$j] = null;
 						echo $trCode;
 					}
 
 				} else {
+						
+					//echo "<!-- $this->categoryNColumns, $i, $visibleI, $cVisibleNC -->";
 
-					if ($i == $this->categoryNColumns) echo str_repeat("<td></td>", $this->getVisibleColumnsCount($stmt, $dArr, 0, $i));
+					if ($visibleI == $cVisibleNC) {
+						echo str_repeat("<td></td>", $visibleI);
+					}
 
 					echo "<td class='sqlDataRow" . $this->odd . "'><span class='td'>";
 					$this->printDataCell($stmt, $dArr, $row, $v);
