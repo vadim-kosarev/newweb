@@ -14,10 +14,10 @@
 var state = 'none';
 
 function getNewState(oldState) {
-	if (oldState == 'block') {
-		return 'none';
-	} else {
+	if (oldState == 'none') {
 		return 'block';
+	} else {
+		return 'none';
 	}	
 }
 
@@ -42,3 +42,4 @@ function showhide(layer_ref) {
 </script>
 </head>
 <body>
+		<div id="progressDiv" style="font-family:Tahoma;width:200px;height:100px;position:absolute;left:50%;top:50%;margin-left:-100px;margin-top:-50px;"><img src="progress.gif" /> Please wait...</div>

@@ -86,9 +86,9 @@ foreach (array_keys($_GET) as $key) {
 
 			$isNegative = false;
 			if (startsWith($val, '!')) {
-                           $val = substr($val, 1);
-                           $isNegative = true;
-                        }
+				$val = substr($val, 1);
+				$isNegative = true;
+			}
 
 
 			$whereAdd .= $p . " = '" . $val . "'";
@@ -106,7 +106,7 @@ foreach (array_keys($_GET) as $key) {
 				$whereAdd = $p . " <= '" . $val . "'";
 			}
 
-                        if ($isNegative) {
+			if ($isNegative) {
 				$whereAdd = " NOT ( " . $whereAdd . " ) ";
 			}
 

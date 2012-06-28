@@ -2,7 +2,13 @@
 include_once("../Common/sys_config.php");
 include_once("../Common/sys_db.php");
 class DefaultReportBuilder {
-
+	
+	public function hideProgressDiv() {
+		?>
+		<script language="JavaScript">showhide("progressDiv")</script>
+		<?php
+	}
+	
 	/**
 	 *
 	 * Enter description here ...
@@ -10,6 +16,7 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function processStmt($stmt, $dArr) {
+		$this->hideProgressDiv();
 		$this->printFilterTable($stmt, $dArr);
 		$this->printPagesLinks();
 		$this->printDataTable($stmt, $dArr);
@@ -233,6 +240,7 @@ class DefaultReportBuilder {
 		?>
 <script language="JavaScript">document.title = <?php echo json_encode($qName); ?></script>
 		<?php
+		
 	}
 
 	/**
