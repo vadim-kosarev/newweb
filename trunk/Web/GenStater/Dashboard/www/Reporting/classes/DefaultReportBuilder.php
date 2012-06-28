@@ -2,13 +2,33 @@
 include_once("../Common/sys_config.php");
 include_once("../Common/sys_db.php");
 class DefaultReportBuilder {
-	
+
+	protected $odd = 1;
+	protected $categoryNColumns = 0;
+	protected $catValues = array();
+	protected $meCreatedTime = 0;
+
+	/**
+	 *
+	 * Enter description here ...
+	 */
+	function __construct() {
+		$time = microtime();
+		$time = explode(' ', $time);
+		$time = $time[1] + $time[0];
+		$this->meCreatedTime = $time;
+	}
+
+	/**
+	 *
+	 * Enter description here ...
+	 */
 	public function hideProgressDiv() {
 		?>
-		<script language="JavaScript">showhide("progressDiv")</script>
+<script language="JavaScript">showhide("progressDiv")</script>
 		<?php
 	}
-	
+
 	/**
 	 *
 	 * Enter description here ...
@@ -29,7 +49,7 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printHeader($dArr) {
-		echo $dArr["header"]; 
+		echo $dArr["header"];
 	}
 
 	/**
@@ -37,9 +57,16 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printFooter($dArr) {
-		echo $dArr["footer"]; 
+		echo $dArr["footer"];
+
+		$time = microtime();
+		$time = explode(' ', $time);
+		$time = $time[1] + $time[0];
+		$finish = $time;
+		$total_time = round(($finish - $this->meCreatedTime), 4);
+		echo 'Page generated in '.$total_time.' seconds.';
 	}
-	
+
 	/**
 	 *
 	 * Enter description here ...
@@ -59,9 +86,6 @@ class DefaultReportBuilder {
 	}
 
 
-
-
-
 	/**
 	 *
 	 * Enter description here ...
@@ -72,7 +96,7 @@ class DefaultReportBuilder {
 		$this->printDataHeader($stmt, $dArr);
 
 		if (isset($_GET["categories"])) $this->categoryNColumns = $_GET["categories"];
-		
+
 		for ($i = 0 ; $i < $this->categoryNColumns ; $i++) {
 			$this->catValues[$i] = null;
 		}
@@ -80,15 +104,9 @@ class DefaultReportBuilder {
 		while ($row = $stmt->fetch()) {
 			$this->printDataRow($stmt, $dArr, $row);
 		}
-		
+
 		$this->printDataFooter($stmt, $dArr);
 	}
-
-
-
-	protected $odd = 1;
-	protected $categoryNColumns = 0;
-	protected $catValues = array();
 
 	public function getQueryVal($key, $row) {
 		$m = array();
@@ -140,7 +158,7 @@ class DefaultReportBuilder {
 					echo $row[$i];
 				}
 			}
-				
+
 		}
 	}
 
@@ -164,7 +182,7 @@ class DefaultReportBuilder {
 				$strMatch = $extQueries[0][$i];
 				$queryArr = array();
 				preg_match_all("/([^,{}]+)/", $strMatch, $queryArr);
-				
+
 				$sPos = strpos($v, $strMatch, $strCInd);
 				echo substr($v, $strCInd, $sPos-$strCInd);
 				$this->execQuery($queryArr[0], $row);
@@ -240,7 +258,7 @@ class DefaultReportBuilder {
 		?>
 <script language="JavaScript">document.title = <?php echo json_encode($qName); ?></script>
 		<?php
-		
+
 	}
 
 	/**
@@ -318,7 +336,7 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 		$cCount = $stmt->columnCount();
 		$qOrderBy = $dArr["orderby"];
 		if (isset($_GET["_orderby"])) {
-				$qOrderBy = $_GET["_orderby"];
+			$qOrderBy = $_GET["_orderby"];
 		}
 		$chartColumns = "";
 		?>
@@ -346,7 +364,8 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 		?>
 			<tr class='filterForm'>
 				<td class='filterForm'>ORDER BY</td>
-				<td class='filterForm'><input name="_orderby" value="<?= $qOrderBy ?>" class='filterForm' /></td>
+				<td class='filterForm'><input name="_orderby"
+					value="<?= $qOrderBy ?>" class='filterForm' /></td>
 			</tr>
 			<?php
 			foreach (array_keys($_GET) as $key) {
