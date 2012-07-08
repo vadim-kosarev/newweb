@@ -39,6 +39,7 @@ table.sqlData {
 td {
     font-size: 10pt;
     vertical-align: top;
+    white-space: pre;
 }
 
 .sqlDataRow1 {
@@ -49,14 +50,10 @@ td {
     background-color: #DDDDDD;
 }
 
-span.td,pre.td,pre.sql {
+span.td, pre.td, pre.sql, td span {
     font-family:Arial,Helvetica,Tahoma,sans-serif;
     font-size: 8pt;
-
-}
-
-span.td {
-    white-space: pre;
+	white-space: pre;
 }
 
 

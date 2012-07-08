@@ -2,9 +2,6 @@
 include_once("../Common/sys_config.php");
 include_once("../Common/sys_utils.php");
 
-$dbUrl = "mysql:host=$config_db_host;dbname=$config_db_name;port=$config_db_port";
-$dbh = new PDO($dbUrl, $config_db_user, $config_db_password);
-
 // -------------- Query ID -----------------------
 $queryID = 1;
 if (isset($_GET["id"]))

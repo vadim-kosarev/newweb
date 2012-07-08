@@ -5,6 +5,7 @@ class DefaultReportBuilder {
 
 	protected $odd = 1;
 	protected $categoryNColumns = 0;
+	protected $editableColumns = 0;
 	protected $catValues = array();
 	protected $meCreatedTime = 0;
 
@@ -13,10 +14,15 @@ class DefaultReportBuilder {
 	 * Enter description here ...
 	 */
 	function __construct() {
+
 		$time = microtime();
 		$time = explode(' ', $time);
 		$time = $time[1] + $time[0];
 		$this->meCreatedTime = $time;
+
+		if (isset($_GET["categories"])) $this->categoryNColumns = $_GET["categories"];
+		if (isset($_GET["editableColumns"])) $this->editableColumns = $_GET["editableColumns"];
+
 	}
 
 	/**
@@ -119,7 +125,7 @@ class DefaultReportBuilder {
 			return $dfltValue;
 		}
 		$columnsArr = preg_split("/[,;]/", $dArr["columns"]);
-		if (count($columnsArr) < 1 || $i >= count($columnsArr) || $columnsArr[$i] == "*") {
+		if (count($columnsArr) < 1 || $i >= count($columnsArr) || $columnsArr[$i] == "*" || preg_match("/^\{.*\}$/", $columnsArr[$i]) ) {
 			return $dfltValue;
 		}
 
@@ -135,8 +141,6 @@ class DefaultReportBuilder {
 	 */
 	public function printDataTable($stmt, $dArr) {
 		$this->printDataHeader($stmt, $dArr);
-
-		if (isset($_GET["categories"])) $this->categoryNColumns = $_GET["categories"];
 
 		for ($i = 0 ; $i < $this->categoryNColumns ; $i++) {
 			$this->catValues[$i] = null;
@@ -245,6 +249,14 @@ class DefaultReportBuilder {
 
 	}
 
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $stmt
+	 * @param unknown_type $dArr
+	 * @param unknown_type $s
+	 * @param unknown_type $cCount
+	 */
 	public function getVisibleColumnsCount($stmt, $dArr, $s, $cCount) {
 		$cVisibleCount = 0;
 		for ($i = $s ; $i < $cCount ; $i++) {
@@ -265,17 +277,21 @@ class DefaultReportBuilder {
 		$cCount = $stmt->columnCount();
 		$cVisibleCount = $this->getVisibleColumnsCount($stmt, $dArr, 0, $cCount);
 		$cVisibleNC = $this->getVisibleColumnsCount($stmt, $dArr, 0, $this->categoryNColumns);
-		
+
+		$dataForCellId = $row;
+
 		$trCode = "<tr class='sqlDataRow" . $this->odd . "'>\n";
 
 		echo $trCode;
+
 		for ($i = 0; $i < $cCount; $i++) {
 
 			if ($this->isColumnVisible($i, $stmt, $dArr)) {
 
 				$visibleI = $this->getVisibleColumnsCount($stmt, $dArr, 0, $i);
-				
+
 				$v = trim($row[$i]);
+
 				if ( $i < $this->categoryNColumns ) {
 
 					if ($this->catValues[$i] != $v) {
@@ -288,14 +304,22 @@ class DefaultReportBuilder {
 					}
 
 				} else {
-						
-					//echo "<!-- $this->categoryNColumns, $i, $visibleI, $cVisibleNC -->";
 
 					if ($visibleI == $cVisibleNC) {
 						echo str_repeat("<td></td>", $visibleI);
 					}
 
-					echo "<td class='sqlDataRow" . $this->odd . "'><span class='td'>";
+					$dataForCellId["__columnIndex"] = $i;
+					$cellClass = "td";
+					$cellId = "";
+
+					if ($i >= $cCount - $this->editableColumns) {
+						$cellId = base64_encode(json_encode($dataForCellId));
+						$cMeta = $stmt->getColumnMeta($i);
+						$cellClass = $cMeta["name"];
+					}
+
+					echo "<td class='sqlDataRow" . $this->odd . "'><span class='$cellClass' id='$cellId'>";
 					$this->printDataCell($stmt, $dArr, $row, $v);
 					echo "</span></td>\n";
 				}
@@ -303,6 +327,7 @@ class DefaultReportBuilder {
 			}
 
 		}
+
 		echo "</tr>\n";
 		$this->odd = ($this->odd + 1) % 2;
 	}
@@ -324,12 +349,82 @@ class DefaultReportBuilder {
 
 
 
+	/**
+	 *
+	 * Enter description here ...
+	 * @param unknown_type $stmt
+	 * @param unknown_type $dArr
+	 */
 	public function printPageHeader($stmt, $dArr) {
 		$this->printHeader($dArr);
 		$qName = $dArr["name"];
 		?>
+
 <script language="JavaScript">document.title = <?php echo json_encode($qName); ?></script>
-		<?php
+
+<script language="JavaScript">
+ $(document).ready(function() {
+     <?php
+
+     	if (array_key_exists("columns", $dArr)) {
+			$columnsArr = preg_split("/[,;]/", $dArr["columns"]);
+			foreach ($columnsArr as $c) {
+				if (preg_match("/^\{(.*)\}$/", $c, $matches) > 0) { // $c = {select:SVN_Documentation_Status}
+					$data = $matches[1];
+					if (preg_match("/^([^\:]+)\:([^\:]+)$/", $data, $m)) { // $data = select:SVN_Documentation_Status
+						 
+						$type = $m[1];
+						$proc = $m[2];
+						$jsDataString = "";
+						
+						if ($type == 'select') {
+							$dataArr = array();
+							global $dbh;
+							$sql = "CALL proc_" . $proc . "_SourceData()";
+							$stmt1 = $dbh->prepare($sql);
+							if ($stmt1->execute()) {
+								while ($row = $stmt1->fetch()) {
+									$dataArr[$row[0]] = $row[1];
+								}
+							}
+							$jsDataString = "data:'" . json_encode($dataArr) . "'";
+							
+						} else if ($type = "textarea") {
+							
+							$jsDataString = "rows:5,cols:30";
+							
+						}
+						
+						echo "
+						
+      $('.$proc').editable('../Collector/save.php' ,{
+    	 type      : '$type',
+    	 indicator : 'saving...',
+         tooltip   : 'Click to edit...',
+         placeholder : 'Click to add new value...',
+         submit    : 'OK',
+         submitdata : {proc: '$proc', size: '" . count($columnsArr)."'},
+         $jsDataString
+    	 }
+     );
+												";
+					}					
+				}
+			}
+     	}
+     
+
+     /**
+      *      
+
+      */
+     ?>
+    	 
+ });
+ </script>
+
+     <?php
+
 
 	}
 
