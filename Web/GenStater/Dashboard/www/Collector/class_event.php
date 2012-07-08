@@ -42,6 +42,8 @@ class Event {
      * @var <type> 
      */
     protected $initArray;
+    
+    protected $bUseTransaction = true;
 
     /**
      * Initializes data
@@ -49,7 +51,20 @@ class Event {
      */
     public function init($array) {
         $this->initArray = $array;
-        $this->internalInit();
+    }
+    
+    public function setValue($key, $value) {
+    	$this->initArray[$key] = $value;
+    }
+    
+    public function setUseTransaction($bValue) {
+    	$this->bUseTransaction = $bValue;
+    }
+    
+    public function initDefault() {
+    	$dArray = array_merge($_GET, $_POST);
+    	$dArray["d_ext_sysRemoteAddr"] = $_SERVER["REMOTE_ADDR"];
+    	$this->init($dArray);
     }
 
     /**
@@ -61,10 +76,10 @@ class Event {
             $dbh->beginTransaction();
             $this->ensureTablesExist();
             $this->storeData();
-            $dbh->commit();
+            if ($this->bUseTransaction) $dbh->commit();
             return true;
         } catch (Exception $e) {
-            $dbh->rollback();
+            if ($this->bUseTransaction) $dbh->rollback();
             return false;
         }
     }
@@ -95,12 +110,6 @@ class Event {
 
 // =================================================================================================================
 
-    /**
-     * internal init
-     */
-    private function internalInit() {
-        
-    }
 
     /**
      *
