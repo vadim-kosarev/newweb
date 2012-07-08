@@ -7,7 +7,7 @@ $data = json_decode($dataStr);
 $value = $_POST["value"];
 $proc = $_POST["proc"];
 $size = $_POST["size"];
-$user = get_current_user();
+$user = $_SERVER['REMOTE_USER'];
 
 {
 	// log this event:
