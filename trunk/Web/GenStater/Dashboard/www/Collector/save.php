@@ -16,6 +16,7 @@ $user = $_SERVER['REMOTE_USER'];
 	$event->setValue("event", "sysLog");
 	$event->setValue("d_ext_sysRemoteAddr", $_SERVER["REMOTE_ADDR"]);
 	$event->setValue("d_ext_user", $user);
+	$event->setValue("d_ext_proc", $proc);
 	$event->setUseTransaction(false);
 	// end of log event
 }
