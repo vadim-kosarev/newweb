@@ -62,8 +62,11 @@ foreach (array_keys($_GET) as $key) {
 		if (!isset($_GET[$key]) || $_GET[$key] == "")
 		continue;
 		$val = $_GET[$key];
+		
 		$p = paramGetToSQL($arr[2]);
 		$p = findFieldByAlias($p, $qSQL);
+		$p = my_decode($p);
+		
 		if ($whereClauseEmpty) {
 			$whereClause .= " WHERE \n";
 		}
