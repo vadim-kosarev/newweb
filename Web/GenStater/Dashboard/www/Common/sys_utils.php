@@ -24,7 +24,7 @@ function my_encode($str) {
     return $str;
 }
 
-function my_dencode($str) {
+function my_decode($str) {
     $str = urldecode($str);
     $str = str_replace("|", ".", $str);
     return $str;
