@@ -8,7 +8,7 @@
 /* style.css end */
 </style>
 
-<script src="../Public/ajax/libs/jquery/1.3.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="../Public/ajax/libs/jquery/1.8.0/jquery-1.8.0.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="../Public/ajax/libs/jquery.jeditable/jquery.jeditable.js" type="text/javascript" charset="utf-8"></script>
 
 <script language="javascript">
