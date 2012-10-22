@@ -13,6 +13,7 @@ if (isset($_GET["reportBuilderClass"]))
 $reportBuilderClass = $_GET["reportBuilderClass"];
 
 include_once("classes/" . $reportBuilderClass . ".php");
+include_once("classes/ReportCache.php");
 
 $reportBuilderObject = null;
 eval("\$reportBuilderObject = new " . $reportBuilderClass . "();");
@@ -28,6 +29,7 @@ $chartColumns = "";
 $xAxis = "";
 $dArr = array();
 $whereClause = "";
+$useCache = false;
 
 
 if ($stmt->execute()) {
@@ -38,6 +40,7 @@ if ($stmt->execute()) {
 	$chartColumns = $dArr["chart_columns"];
 	$xAxis = $dArr["chart_x_axis"];
 	$whereClause = $dArr["where"];
+	$useCache = $dArr["useCache"];
 }
 
 $reportBuilderObject->printPageHeader($stmt, $dArr);
@@ -62,11 +65,11 @@ foreach (array_keys($_GET) as $key) {
 		if (!isset($_GET[$key]) || $_GET[$key] == "")
 		continue;
 		$val = $_GET[$key];
-		
+
 		$p = paramGetToSQL($arr[2]);
 		$p = findFieldByAlias($p, $qSQL);
 		$p = my_decode($p);
-		
+
 		if ($whereClauseEmpty) {
 			$whereClause .= " WHERE \n";
 		}
@@ -140,15 +143,35 @@ if (isset($_GET["limit"])) {
 
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
 
-// echo "<pre>" . $qSQL . "</pre>";
 
-$stmt = $dbh->prepare($qSQL);
+$doQuery = true;
 
-// execute and serialize results
-if ($stmt->execute()) {
-	$reportBuilderObject->processStmt($stmt, $dArr);
-} else {
-	echo "Error during execute query";
-	echo "<pre>" . $qSQL . "</pre>";
+if ($useCache) {
+	$cache = new ReportCache($reportBuilderObject);
+	$cache->loadCache();
+
+	if ($cache->isLoaded()) {
+		echo $cache->content();
+		$doQuery = false;
+	} else {
+		$reportBuilderObject->setOutput($cache);
+	}
 }
+
+if ($doQuery) {
+
+	$stmt = $dbh->prepare($qSQL);
+	if ($stmt->execute()) {
+		$reportBuilderObject->processStmt($stmt, $dArr);
+	} else {
+		echo "Error during execute query";
+		echo "<pre>" . $qSQL . "</pre>";
+	}
+	
+}
+
+if ($useCache && $doQuery) {
+	$cache->storeCache();
+}
+
 ?>

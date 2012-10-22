@@ -14,7 +14,7 @@ class PlainReportBuilderDataOnly extends PlainReportBuilder {
 
 	public function printDataRow($stmt, $dArr, $row) {
 		$cCount = $stmt->columnCount();
-		echo $row[$cCount-1] . "\n";
+		$this->p( $row[$cCount-1] . "\n" );
 	}
 }
 
