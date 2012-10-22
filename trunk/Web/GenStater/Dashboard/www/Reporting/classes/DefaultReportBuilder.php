@@ -8,6 +8,7 @@ class DefaultReportBuilder {
 	protected $editableColumns = 0;
 	protected $catValues = array();
 	protected $meCreatedTime = 0;
+	protected $outputStream = NULL;
 
 	/**
 	 *
@@ -25,14 +26,16 @@ class DefaultReportBuilder {
 
 	}
 
+	public function setOutput($out) {
+		$this->outputStream = $out;
+	}
+
 	/**
 	 *
 	 * Enter description here ...
 	 */
 	public function hideProgressDiv() {
-		?>
-<script language="JavaScript">showhide("progressDiv")</script>
-		<?php
+		$this->p('<script language="JavaScript">showhide("progressDiv")</script>');
 	}
 
 	/**
@@ -55,7 +58,7 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printHeader($dArr) {
-		echo $dArr["header"];
+		$this->p( $dArr["header"] );
 	}
 
 	/**
@@ -63,14 +66,14 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printFooter($dArr) {
-		echo $dArr["footer"];
+		$this->p( $dArr["footer"] );
 
 		$time = microtime();
 		$time = explode(' ', $time);
 		$time = $time[1] + $time[0];
 		$finish = $time;
 		$total_time = round(($finish - $this->meCreatedTime), 4);
-		echo 'Page generated in '.$total_time.' seconds.';
+		$this->p( 'Page generated in '.$total_time.' seconds.' );
 	}
 
 	/**
@@ -81,16 +84,16 @@ class DefaultReportBuilder {
 	 */
 	public function printDataHeader($stmt, $dArr) {
 		// columns headers
-		echo "<table class='sqlData'>";
-		echo "<tr class='sqlDataHeader'>\n";
+		$this->p( "<table class='sqlData'>" );
+		$this->p( "<tr class='sqlDataHeader'>\n");
 		$cCount = $stmt->columnCount();
 		for ($i = 0; $i < $cCount; $i++) {
 			$cMeta = $stmt->getColumnMeta($i);
 			if ($this->isColumnVisible($i, $stmt, $dArr)) {
-				echo "<th class='sqlDataHeader'>" . $this->getColumnTitle($i, $stmt, $dArr, $cMeta["name"]) . "</th>\n";
+				$this->p( "<th class='sqlDataHeader'>" . $this->getColumnTitle($i, $stmt, $dArr, $cMeta["name"]) . "</th>\n");
 			}
 		}
-		echo "</tr>";
+		$this->p( "</tr>" );
 	}
 
 	/**
@@ -211,7 +214,7 @@ class DefaultReportBuilder {
 			$cc = $stmt->columnCount();
 			while ($row = $stmt->fetch()) {
 				for ( $i=0 ; $i < $cc ; $i++ ) {
-					echo $row[$i];
+					$this->p( $row[$i] );
 				}
 			}
 
@@ -230,7 +233,7 @@ class DefaultReportBuilder {
 		$extQueries = array();
 		$matches = preg_match_all ("/\\{\\{\d+[^\\{\\}]*\\}\\}/", $v, $extQueries);
 		if ($matches == 0) {
-			echo $v;
+			$this->p( $v );
 		} else {
 			$cCount = $stmt->columnCount();
 			$strCInd = 0;
@@ -240,11 +243,11 @@ class DefaultReportBuilder {
 				preg_match_all("/([^,{}]+)/", $strMatch, $queryArr);
 
 				$sPos = strpos($v, $strMatch, $strCInd);
-				echo substr($v, $strCInd, $sPos-$strCInd);
+				$this->p( substr($v, $strCInd, $sPos-$strCInd) );
 				$this->execQuery($queryArr[0], $row);
 				$strCInd = $sPos + strlen($strMatch);
 			}
-			echo substr($v, $strCInd);
+			$this->p( substr($v, $strCInd) );
 		}
 
 	}
@@ -282,7 +285,7 @@ class DefaultReportBuilder {
 
 		$trCode = "<tr class='sqlDataRow" . $this->odd . "'>\n";
 
-		echo $trCode;
+		$this->p( $trCode );
 
 		for ($i = 0; $i < $cCount; $i++) {
 
@@ -295,18 +298,18 @@ class DefaultReportBuilder {
 				if ( $i < $this->categoryNColumns ) {
 
 					if ($this->catValues[$i] != $v) {
-						echo "</tr><tr>";
-						echo str_repeat("<td></td>", $visibleI);
-						echo "<td colspan='".($cVisibleCount-$visibleI)."' class='category$i'>$v</td></tr>";
+						$this->p( "</tr><tr>" );
+						$this->p( str_repeat("<td></td>", $visibleI) );
+						$this->p( "<td colspan='".($cVisibleCount-$visibleI)."' class='category$i'>$v</td></tr>" );
 						$this->catValues[$i] = $v;
 						for ($j=$i+1;$j<$this->categoryNColumns;$j++) $this->catValues[$j] = null;
-						echo $trCode;
+						$this->p( $trCode );
 					}
 
 				} else {
 
 					if ($visibleI == $cVisibleNC) {
-						echo str_repeat("<td></td>", $visibleI);
+						$this->p( str_repeat("<td></td>", $visibleI) );
 					}
 
 					$dataForCellId["__columnIndex"] = $i;
@@ -319,16 +322,16 @@ class DefaultReportBuilder {
 						$cellClass = $cMeta["name"];
 					}
 
-					echo "<td class='sqlDataRow" . $this->odd . "'><span class='$cellClass' id='$cellId'>";
+					$this->p( "<td class='sqlDataRow" . $this->odd . "'><span class='$cellClass' id='$cellId'>" );
 					$this->printDataCell($stmt, $dArr, $row, $v);
-					echo "</span></td>\n";
+					$this->p( "</span></td>\n" );
 				}
 
 			}
 
 		}
 
-		echo "</tr>\n";
+		$this->p( "</tr>\n" );
 		$this->odd = ($this->odd + 1) % 2;
 	}
 
@@ -343,11 +346,17 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printDataFooter($stmt, $dArr) {
-		echo "</table>";
+		$this->p( "</table>" );
 	}
 
 
-
+	public function p($content) {
+		if (is_null($this->outputStream)) {
+			echo $content ;
+		} else {
+			$this->outputStream->p($content);
+		}
+	}
 
 	/**
 	 *
@@ -358,25 +367,22 @@ class DefaultReportBuilder {
 	public function printPageHeader($stmt, $dArr) {
 		$this->printHeader($dArr);
 		$qName = $dArr["name"];
-		?>
+		$this->p('<script language="JavaScript">document.title = ' . json_encode($qName) . '</script>');
 
-<script language="JavaScript">document.title = <?php echo json_encode($qName); ?></script>
+		$this->p('<script language="JavaScript">');
+		$this->p('$(document).ready(function() {');
 
-<script language="JavaScript">
- $(document).ready(function() {
-     <?php
-
-     	if (array_key_exists("columns", $dArr)) {
+		if (array_key_exists("columns", $dArr)) {
 			$columnsArr = preg_split("/[,;]/", $dArr["columns"]);
 			foreach ($columnsArr as $c) {
 				if (preg_match("/^\{(.*)\}$/", $c, $matches) > 0) { // $c = {select:SVN_Documentation_Status}
 					$data = $matches[1];
 					if (preg_match("/^([^\:]+)\:([^\:]+)$/", $data, $m)) { // $data = select:SVN_Documentation_Status
-						 
+							
 						$type = $m[1];
 						$proc = $m[2];
 						$jsDataString = "";
-						
+
 						if ($type == 'select') {
 							$dataArr = array();
 							global $dbh;
@@ -388,14 +394,14 @@ class DefaultReportBuilder {
 								}
 							}
 							$jsDataString = "data:'" . json_encode($dataArr) . "'";
-							
+								
 						} else if ($type = "textarea") {
-							
+								
 							$jsDataString = "rows:5,cols:30";
-							
+								
 						}
-						
-						echo "
+
+						$this->p( "
 						
       $('.$proc').editable('../Collector/save.php' ,{
     	 type      : '$type',
@@ -407,24 +413,13 @@ class DefaultReportBuilder {
          $jsDataString
     	 }
      );
-												";
-					}					
+												");
+					}
 				}
 			}
-     	}
-     
+		}
 
-     /**
-      *      
-
-      */
-     ?>
-    	 
- });
- </script>
-
-     <?php
-
+		$this->p('}); </script>');
 
 	}
 
@@ -450,26 +445,29 @@ class DefaultReportBuilder {
 		if ($firstPage1<0) $firstPage1 = 0;
 
 		$lastPage1 =  $currentStart + $currentLimit*$pagesPerDirection;
-		?>
+
+		$this->p('
 <script language="JavaScript">
 function applyLimit(limit) {
 	document.forms["filterForm"].elements["limit"].value=limit;
 	document.forms["filterForm"].submit();
 }
 </script>
-<div class="pagesLinks" align="right"><?php
+<div class="pagesLinks" align="right">		
+		');
 
-echo "<b>Pages:</b>";
-if($firstPage1!=0) {
-	$this->printPageLink(0,$currentLimit,$currentStart);
-	if ($firstPage1!=$currentLimit) echo "...";
-}
+		$this->p( "<b>Pages:</b>" );
+		if($firstPage1!=0) {
+			$this->printPageLink(0,$currentLimit,$currentStart);
+			if ($firstPage1!=$currentLimit) $this->p( "..." );
+		}
 
-for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
-	$this->printPageLink($i,$currentLimit,$currentStart);
-}
-?></div>
-<?php
+		for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
+			$this->printPageLink($i,$currentLimit,$currentStart);
+		}
+
+		$this->p('</div>');
+
 	}
 
 	/**
@@ -483,13 +481,10 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 		$filterValue = "$i,$currentLimit";
 		$isCurrentPage = false;
 		if ($i==$currentStart) $isCurrentPage = true;
-		//echo " [";
-		if ($i>0) echo ",";
-		if (!$isCurrentPage) echo "<a href='#' onclick='applyLimit(\"$filterValue\");return false;'>";
-		//echo "$i.." . ($i+$currentLimit-1);
-		echo $i/$currentLimit+1;
-		if (!$isCurrentPage) echo "</a>";
-		//echo "] ";
+		if ($i>0) $this->p( "," );
+		if (!$isCurrentPage) $this->p( "<a href='#' onclick='applyLimit(\"$filterValue\");return false;'>" );
+		$this->p( $i/$currentLimit+1 );
+		if (!$isCurrentPage) $this->p( "</a>" );
 	}
 
 
@@ -506,16 +501,18 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 			$qOrderBy = $_GET["_orderby"];
 		}
 		$chartColumns = "";
-		?>
+
+		$this->p('
 <br />
-<a href="#" onClick="showhide('filterForm')">SHOW / HIDE Filter Form</a>
+<a href="#" onClick="showhide(\'filterForm\')">SHOW / HIDE Filter Form</a>
 <div id="filterForm" style="display: none">
 <table>
 	<tr>
 		<td>
-		<form action="<?= $_SERVER['REQUEST_URI'] ?>" name="filterForm">
-		<table class="filterForm">
-		<?php
+		<form action="' . $_SERVER['REQUEST_URI'] . '" name="filterForm">
+		<table class="filterForm">		
+		');
+
 		for ($i = 0; $i < $cCount; $i++) {
 			$cMeta = $stmt->getColumnMeta($i);
 			$cMetaName = $cMeta["name"];
@@ -524,33 +521,35 @@ for ($i = $firstPage1 ; $i <= $lastPage1 ; $i+=$currentLimit) {
 			if (isset($_GET[$formParamName])) {
 				$formParamValue = $_GET[$formParamName];
 			}
-			echo "<tr class='filterForm'><td class='filterForm'>" . $formParamName . "</td>";
-			echo "<td class='filterForm'><input name='" . my_encode($formParamName) .
-                        "' type='text' value='$formParamValue' class='filterForm'/></td></tr>\n";
+			$this->p( "<tr class='filterForm'><td class='filterForm'>" . $formParamName . "</td>" );
+			$this->p( "<td class='filterForm'><input name='" . my_encode($formParamName) .
+                        "' type='text' value='$formParamValue' class='filterForm'/></td></tr>\n" );
 		}
-		?>
-			<tr class='filterForm'>
-				<td class='filterForm'>ORDER BY</td>
-				<td class='filterForm'><input name="_orderby"
-					value="<?= $qOrderBy ?>" class='filterForm' /></td>
+
+		$this->p('
+			<tr class="filterForm">
+				<td class="filterForm">ORDER BY</td>
+				<td class="filterForm"><input name="_orderby"
+					value="' . $qOrderBy . '" class="filterForm" /></td>
 			</tr>
-			<?php
-			foreach (array_keys($_GET) as $key) {
-				$arr = array();
-				if (!preg_match("/(sql_)|(_)(.+)/i", $key, $arr)) {
-					echo "<input type='hidden' name='$key' value='".$_GET[$key]."'/>\n";
-				}
+		
+		');
+
+		foreach (array_keys($_GET) as $key) {
+			$arr = array();
+			if (!preg_match("/(sql_)|(_)(.+)/i", $key, $arr)) {
+				$this->p( "<input type='hidden' name='$key' value='".$_GET[$key]."'/>\n" );
 			}
-			if (!isset($_GET["limit"])) {
-				?>
-			<input type="hidden" name="limit" value="0,<?=$reportDefaultLimit?>" />
-			<?php
-			}
-			?>
+		}
+		if (!isset($_GET["limit"])) {
+			$this->p('<input type="hidden" name="limit" value="0,' . $reportDefaultLimit . '" />');
+		}
+			
+		$this->p('
 		</table>
 		<input type="submit" /> <pre class="hint">
 HINT:
-sql_X : VALUE     =>   X = 'VALUE'
+sql_X : VALUE     =>   X = "VALUE"
 sql_X : VAL*STR   =>   X LIKE "VAL%STR"
 sql_X : V1...     =>   X >= "V1"
 sql_X : ...V2     =>   X <= "V2"
@@ -560,34 +559,20 @@ sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
 sql_X : !RRR      =>   NOT ( RRR )
                 </pre></form>
 		</td>
-		<td><?php if ($chartColumns) { ?> <img
-			src="png_pChart.php?ts=<?= time() ?>&data=<?=$chartColumns?>&xAxis=<?=$xAxis?>&sql=<?= urlencode($qSQL) ?>" />
-			<?php } ?></td>
+		<td>			
+			');
+
+	 if ($chartColumns) {
+	 	$this->p('<img src="png_pChart.php?ts=' . time() . '&data=' . $chartColumns . '&xAxis=' . $xAxis . '&sql=' . urlencode($qSQL) . '" />');
+	 }
+
+	 $this->p('
+</td>
 	</tr>
 </table>
 
 </div>
-			<?php
+	 ');
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
 ?>

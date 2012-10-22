@@ -7,7 +7,7 @@ class PlainReportBuilderSimple extends PlainReportBuilder {
 	 * @see DefaultReportBuilder::printDataHeader()
 	 */
 	public function printDataHeader($stmt, $dArr) {
-		?>
+		$this->p('
 <style>
 <!--
 
@@ -28,8 +28,8 @@ div.category2 {
 }
 
 -->
-</style>		
-		<?php 
+</style>				
+		');
 	}
 
 	
@@ -48,15 +48,12 @@ div.category2 {
 					$this->catValues[$i] = $v;
 					for ($j = $i+1 ; $j < $this->categoryNColumns; $j++) $this->catValues[$j] = null;
 					
-					echo "<div class='category$i'>$v</div>";
+					$this->p( "<div class='category$i'>$v</div>" );
 				}
 				
 			} else {
-				//echo " $v ";
 			}
 		}
-		//echo "<br/>\n";
-
 	}
 
 

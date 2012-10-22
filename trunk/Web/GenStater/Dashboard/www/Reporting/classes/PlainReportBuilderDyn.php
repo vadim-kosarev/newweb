@@ -7,7 +7,8 @@ class PlainReportBuilderDyn extends PlainReportBuilder {
 	 * @see DefaultReportBuilder::printDataHeader()
 	 */
 	public function printDataHeader($stmt, $dArr) {
-		?>
+		$this->p( '
+		 
 <style>
 <!--
 div.category0 {
@@ -28,7 +29,8 @@ div.category2 {
 }
 -->
 </style>
-		<?php
+				
+		' );
 	}
 
 	private $divOpen = false;
@@ -61,7 +63,7 @@ div.category2 {
 
 				if ($this->catValues[$i] != $v) {
 					if ($this->divOpen) {
-						echo "</div>";
+						$this->p( "</div>");
 						$this->divOpen = false;
 					}
 
@@ -75,22 +77,22 @@ div.category2 {
 						if ($this->showData()) {
 							$addHtml = " <small>[<a href=# onclick='showhide(\"$divId\");return false;'>...</a>]</small>";
 						}
-						echo "<div class='category$i'>$v$addHtml</div>";
-						echo "<div id='$divId' style='display: none;'>";
+						$this->p( "<div class='category$i'>$v$addHtml</div>");
+						$this->p( "<div id='$divId' style='display: none;'>");
 
 						$this->divOpen = true;
 
 					} else {
-						echo "<div class='category$i'>$v</div>";
+						$this->p( "<div class='category$i'>$v</div>");
 					}
 				}
 
 			} else {
 				if ($this->showData())
-				echo " $v ";
+				$this->p( " $v ");
 			}
 		}
-		if ($this->showData()) echo "<br/>\n";
+		if ($this->showData()) $this->p( "<br/>\n");
 
 	}
 
