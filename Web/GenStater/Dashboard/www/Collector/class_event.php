@@ -295,7 +295,7 @@ class Event {
     }
 
     private function sql_dropDataView($dataTable) {
-        $sql = "DROP VIEW view_" . $dataTable;
+        $sql = "DROP VIEW IF EXISTS view_" . $dataTable;
         global $dbh;
         $dbh->query($sql);
     }
@@ -324,7 +324,8 @@ class Event {
             } else {
                 $f = $dataTable . "." . $fieldName;
             }
-            $sql .= $f . " AS `" . $f . "`";
+            $fn = strlen($f) > 64 ? $fieldName : $f;
+            $sql .= $f . " AS `" . $fn . "`";
             $bComma = true;
         }
 
