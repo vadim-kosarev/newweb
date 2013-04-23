@@ -50,30 +50,32 @@ class DefaultReportBuilder {
 		$this->printPagesLinks();
 		$this->printDataTable($stmt, $dArr);
 		$this->printPagesLinks();
-		$this->printFooter($dArr);
+		$this->printFooter($stmt, $dArr);
 	}
 
 	/**
 	 * Enter description here ...
 	 * @param unknown_type $dArr
 	 */
-	public function printHeader($dArr) {
-		$this->p( $dArr["header"] );
+	public function printHeader($stmt, $dArr) {
+		//$this->p( $dArr["header"] );
+		$this->printDataCell($stmt, $dArr, $dArr, $dArr["header"]);
 	}
 
 	/**
 	 * Enter description here ...
 	 * @param unknown_type $dArr
 	 */
-	public function printFooter($dArr) {
-		$this->p( $dArr["footer"] );
+	public function printFooter($stmt, $dArr) {
+		//$this->p( $dArr["footer"] );
+		$this->printDataCell($stmt, $dArr, $dArr, $dArr["footer"]);
 
 		$time = microtime();
 		$time = explode(' ', $time);
 		$time = $time[1] + $time[0];
 		$finish = $time;
 		$total_time = round(($finish - $this->meCreatedTime), 4);
-		$this->p( 'Page generated in '.$total_time.' seconds.' );
+		$this->p( 'Page generated in '.$total_time.' seconds on ' . date("D M j G:i:s T Y") );
 	}
 
 	/**
@@ -227,7 +229,8 @@ class DefaultReportBuilder {
 	 * @param unknown_type $stmt
 	 * @param unknown_type $dArr
 	 * @param unknown_type $row
-	 * @param unknown_type $v
+	 * @param string $v -- can be a string to output OR contain something like {{1211,$0}} which means
+	 *    - "execute query id=1211 with $row[0] as a first parameter of that query
 	 */
 	public function printDataCell($stmt, $dArr, $row, $v) {
 		$extQueries = array();
@@ -365,7 +368,7 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printPageHeader($stmt, $dArr) {
-		$this->printHeader($dArr);
+		$this->printHeader($stmt, $dArr);
 		$qName = $dArr["name"];
 		$this->p('<script language="JavaScript">document.title = ' . json_encode($qName) . '</script>');
 
@@ -394,26 +397,26 @@ class DefaultReportBuilder {
 								}
 							}
 							$jsDataString = "data:'" . json_encode($dataArr) . "'";
-								
+
 						} else if ($type = "textarea") {
-								
+
 							$jsDataString = "rows:5,cols:30";
-								
+
 						}
 
 						$this->p( "
-						
-      $('.$proc').editable('../Collector/save.php' ,{
-    	 type      : '$type',
-    	 indicator : 'saving...',
-         tooltip   : 'Click to edit...',
-         placeholder : 'Click to add new value...',
-         submit    : 'OK',
-         submitdata : {proc: '$proc', size: '" . count($columnsArr)."'},
-         $jsDataString
-    	 }
-     );
-												");
+
+								$('.$proc').editable('../Collector/save.php' ,{
+								type      : '$type',
+								indicator : 'saving...',
+								tooltip   : 'Click to edit...',
+								placeholder : 'Click to add new value...',
+								submit    : 'OK',
+								submitdata : {proc: '$proc', size: '" . count($columnsArr)."'},
+								$jsDataString
+					}
+						);
+								");
 					}
 				}
 			}
@@ -447,14 +450,14 @@ class DefaultReportBuilder {
 		$lastPage1 =  $currentStart + $currentLimit*$pagesPerDirection;
 
 		$this->p('
-<script language="JavaScript">
-function applyLimit(limit) {
-	document.forms["filterForm"].elements["limit"].value=limit;
-	document.forms["filterForm"].submit();
-}
-</script>
-<div class="pagesLinks" align="right">		
-		');
+				<script language="JavaScript">
+				function applyLimit(limit) {
+				document.forms["filterForm"].elements["limit"].value=limit;
+				document.forms["filterForm"].submit();
+	}
+				</script>
+				<div class="pagesLinks" align="right">
+				');
 
 		$this->p( "<b>Pages:</b>" );
 		if($firstPage1!=0) {
@@ -503,15 +506,15 @@ function applyLimit(limit) {
 		$chartColumns = "";
 
 		$this->p('
-<br />
-<a href="#" onClick="showhide(\'filterForm\')">SHOW / HIDE Filter Form</a>
-<div id="filterForm" style="display: none">
-<table>
-	<tr>
-		<td>
-		<form action="' . $_SERVER['REQUEST_URI'] . '" name="filterForm">
-		<table class="filterForm">		
-		');
+				<br />
+				<a href="#" onClick="showhide(\'filterForm\')">SHOW / HIDE Filter Form</a>
+				<div id="filterForm" style="display: none">
+				<table>
+				<tr>
+				<td>
+				<form action="' . $_SERVER['REQUEST_URI'] . '" name="filterForm">
+				<table class="filterForm">
+				');
 
 		for ($i = 0; $i < $cCount; $i++) {
 			$cMeta = $stmt->getColumnMeta($i);
@@ -523,17 +526,17 @@ function applyLimit(limit) {
 			}
 			$this->p( "<tr class='filterForm'><td class='filterForm'>" . $formParamName . "</td>" );
 			$this->p( "<td class='filterForm'><input name='" . my_encode($formParamName) .
-                        "' type='text' value='$formParamValue' class='filterForm'/></td></tr>\n" );
+					"' type='text' value='$formParamValue' class='filterForm'/></td></tr>\n" );
 		}
 
 		$this->p('
-			<tr class="filterForm">
+				<tr class="filterForm">
 				<td class="filterForm">ORDER BY</td>
 				<td class="filterForm"><input name="_orderby"
-					value="' . $qOrderBy . '" class="filterForm" /></td>
-			</tr>
-		
-		');
+				value="' . $qOrderBy . '" class="filterForm" /></td>
+				</tr>
+
+				');
 
 		foreach (array_keys($_GET) as $key) {
 			$arr = array();
@@ -546,33 +549,33 @@ function applyLimit(limit) {
 		}
 			
 		$this->p('
-		</table>
-		<input type="submit" /> <pre class="hint">
-HINT:
-sql_X : VALUE     =>   X = "VALUE"
-sql_X : VAL*STR   =>   X LIKE "VAL%STR"
-sql_X : V1...     =>   X >= "V1"
-sql_X : ...V2     =>   X <= "V2"
-sql_X : V1...V2   =>   X >= "V1" AND X <= "V2"
+				</table>
+				<input type="submit" /> <pre class="hint">
+				HINT:
+				sql_X : VALUE     =>   X = "VALUE"
+				sql_X : VAL*STR   =>   X LIKE "VAL%STR"
+				sql_X : V1...     =>   X >= "V1"
+				sql_X : ...V2     =>   X <= "V2"
+				sql_X : V1...V2   =>   X >= "V1" AND X <= "V2"
 
-sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
-sql_X : !RRR      =>   NOT ( RRR )
-                </pre></form>
-		</td>
-		<td>			
-			');
+				sql_X : RRR,YYY   =>   (X [=|LIKE|>=|<=] RRR OR X [=|LIKE|>=|<=] YYY)
+				sql_X : !RRR      =>   NOT ( RRR )
+				</pre></form>
+				</td>
+				<td>
+				');
 
 	 if ($chartColumns) {
 	 	$this->p('<img src="png_pChart.php?ts=' . time() . '&data=' . $chartColumns . '&xAxis=' . $xAxis . '&sql=' . urlencode($qSQL) . '" />');
 	 }
 
 	 $this->p('
-</td>
-	</tr>
-</table>
+	 		</td>
+	 		</tr>
+	 		</table>
 
-</div>
-	 ');
+	 		</div>
+	 		');
 	}
 }
 ?>
