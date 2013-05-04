@@ -10,7 +10,8 @@ function paramGetToSQL($param) {
  */
 function findFieldByAlias($what, $where) {
     $arr = array();
-    $preg = "/([^\\s]+) AS [\\'\\\"]?".$what."[\'\"]?/i";
+    //$preg = "/([^\\s]+) AS [\\'\\\"]?".$what."[\'\"]?/i";
+    $preg = "/\\n([^\\n]+) AS [\\'\\\"]?".$what."[\'\"]?/i";
     if ( preg_match($preg, $where, $arr) ) {
         return $arr[1];
     } else {

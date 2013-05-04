@@ -58,7 +58,6 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printHeader($stmt, $dArr) {
-		//$this->p( $dArr["header"] );
 		$this->printDataCell($stmt, $dArr, $dArr, $dArr["header"]);
 	}
 
@@ -67,7 +66,6 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printFooter($stmt, $dArr) {
-		//$this->p( $dArr["footer"] );
 		$this->printDataCell($stmt, $dArr, $dArr, $dArr["footer"]);
 
 		$time = microtime();
@@ -203,13 +201,15 @@ class DefaultReportBuilder {
 
 		$querySQL = $this->getSQL($qID);
 
-		global $dbh;
-		$stmt = $dbh->prepare($querySQL);
+		global $dbhTarget;
+		$stmt = $dbhTarget->prepare($querySQL);
 
 		$arrSize = count($queryArr);
 		for ($i=1;$i<$arrSize;$i++) {
 			$val = $this->getQueryVal($queryArr[$i], $row);
-			$stmt->bindValue(":ARG".$i, $val);
+			$valueToBind = ":ARG" . $i;
+			$stmt->bindValue($valueToBind, $val);
+			//echo "$valueToBind : $val"; 
 		}
 
 		if ($stmt->execute()) {
@@ -566,7 +566,8 @@ class DefaultReportBuilder {
 				');
 
 	 if ($chartColumns) {
-	 	$this->p('<img src="png_pChart.php?ts=' . time() . '&data=' . $chartColumns . '&xAxis=' . $xAxis . '&sql=' . urlencode($qSQL) . '" />');
+	 	$this->p('<img src="png_pChart.php?ts=' . time() . '&data=' . $chartColumns . '&xAxis=' . $xAxis . '&sql=' 
+	 			. urlencode($qSQL) . '" />');
 	 }
 
 	 $this->p('
