@@ -68,9 +68,9 @@ foreach (array_keys($_GET) as $key) {
 		// Replace @variables
 		$replaceCount = 0;
 		if ($whereClause) {
-			$whereClause = str_replace("@".$key, '"'.mysql_real_escape_string($val).'"', $whereClause);
+			$whereClause = str_replace("@".$key, '"'.mysql_escape_string($val).'"', $whereClause);
 		}
-		$qSQL = str_replace("@".$key, '"'.mysql_real_escape_string($val).'"', $qSQL, $replaceCount);
+		$qSQL = str_replace("@".$key, '"'.mysql_escape_string($val).'"', $qSQL, $replaceCount);
 		if ($replaceCount) continue;
         // End: Replace @variables
 		
