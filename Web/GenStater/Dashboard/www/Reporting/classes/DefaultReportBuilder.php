@@ -197,6 +197,12 @@ class DefaultReportBuilder {
 	 * @param unknown_type $row
 	 */
 	public function execQuery($queryArr, $row) {
+		$vp = $this->getExecQueryResult($queryArr, $row);
+		$this->p($vp);
+	}
+
+	public function getExecQueryResult($queryArr, $row) {
+		$result = "";
 		$qID = $queryArr[0];
 
 		$querySQL = $this->getSQL($qID);
@@ -209,18 +215,19 @@ class DefaultReportBuilder {
 			$val = $this->getQueryVal($queryArr[$i], $row);
 			$valueToBind = ":ARG" . $i;
 			$stmt->bindValue($valueToBind, $val);
-			//echo "$valueToBind : $val"; 
+			//echo "$valueToBind : $val";
 		}
 
 		if ($stmt->execute()) {
 			$cc = $stmt->columnCount();
 			while ($row = $stmt->fetch()) {
 				for ( $i=0 ; $i < $cc ; $i++ ) {
-					$this->p( $row[$i] );
+					//$this->p( $row[$i] );
+					$result .= $row[$i];
 				}
 			}
-
 		}
+		return $result;
 	}
 
 	/**
@@ -233,11 +240,19 @@ class DefaultReportBuilder {
 	 *    - "execute query id=1211 with $row[0] as a first parameter of that query
 	 */
 	public function printDataCell($stmt, $dArr, $row, $v) {
+		$pv = $this->getDataCellValue($stmt, $dArr, $row, $v);
+		$this->p($pv);
+	}
+
+	public function getDataCellValue($stmt, $dArr, $row, $v) {
 		$extQueries = array();
 		$matches = preg_match_all ("/\\{\\{\d+[^\\{\\}]*\\}\\}/", $v, $extQueries);
 		if ($matches == 0) {
-			$this->p( $v );
+			return $v;
 		} else {
+				
+			$res = "";
+				
 			$cCount = $stmt->columnCount();
 			$strCInd = 0;
 			for ($i = 0 ; $i < $matches ; $i++ ) {
@@ -246,12 +261,16 @@ class DefaultReportBuilder {
 				preg_match_all("/([^,{}]+)/", $strMatch, $queryArr);
 
 				$sPos = strpos($v, $strMatch, $strCInd);
-				$this->p( substr($v, $strCInd, $sPos-$strCInd) );
-				$this->execQuery($queryArr[0], $row);
+				//$this->p( substr($v, $strCInd, $sPos-$strCInd) );
+				$res .= substr($v, $strCInd, $sPos-$strCInd);
+				//$this->execQuery($queryArr[0], $row);
+				$res .= $this->getExecQueryResult($queryArr[0], $row);
 				$strCInd = $sPos + strlen($strMatch);
 			}
-			$this->p( substr($v, $strCInd) );
+			//$this->p( substr($v, $strCInd) );
+			$res .= substr($v, $strCInd);
 		}
+		return $res;
 
 	}
 
@@ -503,7 +522,7 @@ class DefaultReportBuilder {
 		if (isset($_GET["_orderby"])) {
 			$qOrderBy = $_GET["_orderby"];
 		}
-		$chartColumns = "";
+		$chartColumns = $dArr["chart_columns"];
 
 		$this->p('
 				<br />
@@ -512,7 +531,7 @@ class DefaultReportBuilder {
 				<table>
 				<tr>
 				<td>
-				<form action="' . $_SERVER['REQUEST_URI'] . '" name="filterForm">
+				<form action="' . $_SERVER['REQUEST_URI'] . '" name="filterForm" id="filterformForm">
 				<table class="filterForm">
 				');
 
@@ -538,19 +557,34 @@ class DefaultReportBuilder {
 
 				');
 
+		$this->p( "<input type='hidden' name='reportBuilderClass' id='reportBuilderClass' value='".get_class($this)."'/>\n" );
+		
 		foreach (array_keys($_GET) as $key) {
 			$arr = array();
-			if (!preg_match("/(sql_)|(_)(.+)/i", $key, $arr)) {
+			if ($key == "reportBuilderClass") {
+				// do nothing
+			}
+			else if (!preg_match("/(sql_)|(_)(.+)/i", $key, $arr)) {
 				$this->p( "<input type='hidden' name='$key' value='".$_GET[$key]."'/>\n" );
 			}
 		}
+		
 		if (!isset($_GET["limit"])) {
 			$this->p('<input type="hidden" name="limit" value="0,' . $reportDefaultLimit . '" />');
 		}
 			
 		$this->p('
 				</table>
-				<input type="submit" /> <pre class="hint">
+				<input type="submit" />');
+		if ($chartColumns) {
+			$imageUrl = $_SERVER['REQUEST_URI'];
+			$imageUrl = preg_replace("/[^\/\?]+\?/", "web_query.php?", $imageUrl);
+			$imageUrl .= "&reportBuilderClass=PChartReportBuilder";
+			$this->p("<a href='".$imageUrl."' target='_blank'>[Click to generate image]</a>");
+	 		
+	    }
+		$this->p('
+				<pre class="hint">
 				HINT:
 				sql_X : VALUE     =>   X = "VALUE"
 				sql_X : VAL*STR   =>   X LIKE "VAL%STR"
@@ -565,10 +599,6 @@ class DefaultReportBuilder {
 				<td>
 				');
 
-	 if ($chartColumns) {
-	 	$this->p('<img src="png_pChart.php?ts=' . time() . '&data=' . $chartColumns . '&xAxis=' . $xAxis . '&sql=' 
-	 			. urlencode($qSQL) . '" />');
-	 }
 
 	 $this->p('
 	 		</td>
