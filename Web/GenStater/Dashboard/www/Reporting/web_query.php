@@ -1,6 +1,5 @@
 <?php
-include_once("../Common/sys_config.php");
-include_once("../Common/sys_utils.php");
+include_once("php_header.php");
 
 // -------------- Query ID -----------------------
 $queryID = 1;
@@ -66,10 +65,19 @@ foreach (array_keys($_GET) as $key) {
 		continue;
 		$val = $_GET[$key];
 
+		// Replace @variables
+		$replaceCount = 0;
+		if ($whereClause) {
+			$whereClause = str_replace("@".$key, '"'.mysql_real_escape_string($val).'"', $whereClause);
+		}
+		$qSQL = str_replace("@".$key, '"'.mysql_real_escape_string($val).'"', $qSQL, $replaceCount);
+		if ($replaceCount) continue;
+        // End: Replace @variables
+		
 		$p = paramGetToSQL($arr[2]);
 		$p = findFieldByAlias($p, $qSQL);
 		$p = my_decode($p);
-
+		
 		if ($whereClauseEmpty) {
 			$whereClause .= " WHERE \n";
 		}
@@ -114,6 +122,8 @@ foreach (array_keys($_GET) as $key) {
 			}
 
 			$valsWhereAdd .= ($isOrAdding?" OR ":"") . $whereAdd;
+			
+			//echo "\n --- \n $valsWhereAdd \n --- \n";
 
 			$isOrAdding = true;
 		}
@@ -143,6 +153,7 @@ if (isset($_GET["limit"])) {
 
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
 
+echo "<pre> $qSQL </pre>";
 
 $doQuery = true;
 
@@ -160,7 +171,7 @@ if ($useCache) {
 
 if ($doQuery) {
 
-	$stmt = $dbh->prepare($qSQL);
+	$stmt = $dbhTarget->prepare($qSQL);
 	if ($stmt->execute()) {
 		$reportBuilderObject->processStmt($stmt, $dArr);
 	} else {

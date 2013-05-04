@@ -2,3 +2,5 @@
 #AuthName "Restricted Files"
 #AuthUserFile /home/vkosarev/web/Reporting/.htpasswd
 #Require valid-user
+
+php_value max_execution_time 1800
