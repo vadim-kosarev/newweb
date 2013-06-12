@@ -60,7 +60,17 @@ div.category2 {
 	 * @see DefaultReportBuilder::printPageHeader()
 	 */
 	public function printPageHeader($stmt, $dArr) {
-			
+		$this->printHeader($stmt, $dArr);
+	}
+	
+	/**
+	 * Enter description here ...
+	 * @param unknown_type $dArr
+	 */
+	public function printHeader($stmt, $dArr) {
+		if (isset($_GET["header"]) && "true" === $_GET["header"]) {
+			$this->printDataCell($stmt, $dArr, $dArr, $dArr["header"]);
+		}
 	}
 
 
