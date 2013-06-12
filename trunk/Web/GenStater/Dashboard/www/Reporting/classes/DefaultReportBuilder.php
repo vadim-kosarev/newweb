@@ -58,7 +58,9 @@ class DefaultReportBuilder {
 	 * @param unknown_type $dArr
 	 */
 	public function printHeader($stmt, $dArr) {
-		$this->printDataCell($stmt, $dArr, $dArr, $dArr["header"]);
+		if (isset($dArr["header"])) {
+			$this->printDataCell($stmt, $dArr, $dArr, $dArr["header"]);
+		}
 	}
 
 	/**
@@ -388,7 +390,10 @@ class DefaultReportBuilder {
 	 */
 	public function printPageHeader($stmt, $dArr) {
 		$this->printHeader($stmt, $dArr);
-		$qName = $dArr["name"];
+		$qName = "";
+		if (isset($dArr["name"])) {
+			$qName = $dArr["name"];
+		}
 		$this->p('<script language="JavaScript">document.title = ' . json_encode($qName) . '</script>');
 
 		$this->p('<script language="JavaScript">');
