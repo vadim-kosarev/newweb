@@ -153,7 +153,9 @@ if (isset($_GET["limit"])) {
 
 $qSQL = $qSQL . $whereClause . "\n" . $orderByAdd . "\n" . $limitAdd;
 
-// echo "<pre> $qSQL </pre>";
+if (isset($_GET["showSQL"]) && "true" === $_GET["showSQL"]) {
+   echo "<pre>\n $qSQL \n</pre>";
+}
 
 $doQuery = true;
 
