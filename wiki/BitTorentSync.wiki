@@ -9,7 +9,7 @@ Add your content here.
 
 
 = Details =
-=== Direct links to BitTorent Sync official site pages ===
+=== Shortcuts ===
 [http://www.bittorrent.com/intl/ru/sync/developers Sync Developer API]
 
 [http://www.bittorrent.com/intl/ru/sync/downloads Downloads]
