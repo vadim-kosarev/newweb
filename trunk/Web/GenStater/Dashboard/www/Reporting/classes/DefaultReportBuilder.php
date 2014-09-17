@@ -248,13 +248,11 @@ class DefaultReportBuilder {
 
 	public function getDataCellValue($stmt, $dArr, $row, $v) {
 		$extQueries = array();
+
 		$matches = preg_match_all ("/\\{\\{\d+[^\\{\\}]*\\}\\}/", $v, $extQueries);
-		if ($matches == 0) {
-			return $v;
-		} else {
-				
+		if ($matches) {
 			$res = "";
-				
+
 			$cCount = $stmt->columnCount();
 			$strCInd = 0;
 			for ($i = 0 ; $i < $matches ; $i++ ) {
@@ -271,8 +269,23 @@ class DefaultReportBuilder {
 			}
 			//$this->p( substr($v, $strCInd) );
 			$res .= substr($v, $strCInd);
+			return $res;
 		}
-		return $res;
+
+		$rArray = array();
+		$matches = preg_match_all('/\\{\\{(\\w+)\\}\\}/', $v, $rArray);
+
+		
+		if ($matches) {
+			for ($i = 0 ; $i < $matches ; $i++) {
+				if (array_key_exists($rArray[1][$i], $_SERVER)) {
+					$v = str_replace($rArray[0][$i], $_SERVER[$rArray[1][$i]], $v);
+				}
+			}
+			return $v;
+		}
+
+		return $v;
 
 	}
 
@@ -563,7 +576,7 @@ class DefaultReportBuilder {
 				');
 
 		$this->p( "<input type='hidden' name='reportBuilderClass' id='reportBuilderClass' value='".get_class($this)."'/>\n" );
-		
+
 		foreach (array_keys($_GET) as $key) {
 			$arr = array();
 			if ($key == "reportBuilderClass") {
@@ -573,7 +586,7 @@ class DefaultReportBuilder {
 				$this->p( "<input type='hidden' name='$key' value='".$_GET[$key]."'/>\n" );
 			}
 		}
-		
+
 		if (!isset($_GET["limit"])) {
 			$this->p('<input type="hidden" name="limit" value="0,' . $reportDefaultLimit . '" />');
 		}
@@ -586,8 +599,8 @@ class DefaultReportBuilder {
 			$imageUrl = preg_replace("/[^\/\?]+\?/", "web_query.php?", $imageUrl);
 			$imageUrl .= "&reportBuilderClass=PChartReportBuilder";
 			$this->p("<a href='".$imageUrl."' target='_blank'>[Click to generate image]</a>");
-	 		
-	    }
+
+		}
 		$this->p('
 				<pre class="hint">
 				HINT:
